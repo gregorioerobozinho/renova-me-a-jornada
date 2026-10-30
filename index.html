@@ -1,0 +1,290 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101820">
+    <meta name="description" content="Renova-me: a jornada! Uma aventura de fé, graça e perseverança.">
+    <title>Renova-me: a jornada!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main id="app">
+
+        <!-- TELA INICIAL -->
+        <section id="tela-inicial" class="tela ativa"
+                 aria-labelledby="titulo-jogo">
+
+            <div class="painel-inicial">
+                <img
+                    src="Logo.png"
+                    alt="As aventuras de Gregório e Robozinho"
+                    class="logo-jogo"
+                >
+
+                <h1 id="titulo-jogo">Renova-me: a jornada!</h1>
+                <p class="subtitulo">
+                    Uma jornada de fé, graça e perseverança.
+                </p>
+
+                <nav class="menu-principal" aria-label="Menu principal">
+                    <button id="btn-jogar" type="button">Jogar</button>
+                    <button id="btn-como-jogar" type="button">
+                        Como jogar
+                    </button>
+                    <button id="btn-creditos" type="button">Créditos</button>
+                </nav>
+            </div>
+        </section>
+
+        <!-- BOAS-VINDAS BÍBLICAS -->
+        <section id="tela-boas-vindas" class="tela"
+                 aria-labelledby="titulo-boas-vindas"
+                 hidden>
+            <div class="painel">
+                <h2 id="titulo-boas-vindas">O início da jornada</h2>
+
+                <blockquote>
+                    “O meu socorro vem do Senhor, que fez o céu e a terra.”
+                    <cite>Salmo 121:2</cite>
+                </blockquote>
+
+                <p>
+                    Toda jornada tem seus desafios, mas não caminhamos
+                    sozinhos. Confie no Senhor, persevere e mantenha os
+                    olhos em Cristo. Que esta aventura nos lembre de que
+                    o nosso socorro vem de Deus!
+                </p>
+
+                <button id="btn-continuar" type="button">
+                    Continuar
+                </button>
+                <button class="btn-secundario btn-menu" type="button">
+                    Voltar ao menu
+                </button>
+            </div>
+        </section>
+
+        <!-- SELEÇÃO DE FASE -->
+        <section id="tela-selecao-fases" class="tela"
+                 aria-labelledby="titulo-selecao-fases" hidden>
+            <div class="painel">
+                <h2 id="titulo-selecao-fases">Escolha sua fase</h2>
+                <p>Você pode começar por qualquer uma das dez fases.</p>
+                <div id="lista-fases" class="lista-fases"
+                     aria-label="Fases disponíveis"></div>
+                <button class="btn-secundario btn-menu" type="button">
+                    Voltar ao menu
+                </button>
+            </div>
+        </section>
+
+        <!-- COMO JOGAR -->
+        <section id="tela-instrucoes" class="tela"
+                 aria-labelledby="titulo-instrucoes"
+                 hidden>
+            <div class="painel">
+                <h2 id="titulo-instrucoes">Como jogar</h2>
+
+                <ul class="lista-instrucoes">
+                    <li>Use os controles para movimentar o Robozinho.</li>
+                    <li>Pule os caixotes e procure as nuvens claras.</li>
+                    <li>As nuvens claras representam bênçãos no caminho.</li>
+                    <li>Use a Bíblia para atingir caixas e adormecer as feras.</li>
+                    <li>Preserve suas vidas e mantenha os olhos em Cristo.</li>
+                </ul>
+
+                <p class="observacao">
+                    Os comandos definitivos serão ativados durante a
+                    implementação dos controles do jogo.
+                </p>
+
+                <button class="btn-menu" type="button">
+                    Voltar ao menu
+                </button>
+            </div>
+        </section>
+
+        <!-- CRÉDITOS -->
+        <section id="tela-creditos" class="tela"
+                 aria-labelledby="titulo-creditos"
+                 hidden>
+            <div class="painel">
+                <h2 id="titulo-creditos">Créditos</h2>
+
+                <p>
+                    <strong>Renova-me Deus Meu</strong>
+                </p>
+
+                <p>
+                    Criadores: Rosilene Maria da Silva Oliveira
+                    e Ricardo Augusto de Oliveira.
+                </p>
+
+                <p>
+                    Contato:
+                    <a href="mailto:grupodeusemaior@gmail.com">
+                        grupodeusemaior@gmail.com
+                    </a>
+                </p>
+
+                <button class="btn-menu" type="button">
+                    Voltar ao menu
+                </button>
+            </div>
+        </section>
+
+        <!-- ÁREA DO JOGO -->
+        <section id="tela-jogo" class="tela"
+                 aria-label="Área da aventura"
+                 hidden>
+
+            <header class="barra-jogo">
+                <span id="indicador-fase">Fase 1 de 10</span>
+                <span id="indicador-vidas" aria-live="polite">
+                    Vidas: 7
+                </span>
+                <div class="acoes-jogo">
+                    <button id="btn-pausar" type="button" aria-pressed="false">
+                        Pausar
+                    </button>
+                    <button id="btn-sair-fase" class="btn-secundario" type="button">
+                        Escolher fase
+                    </button>
+                </div>
+            </header>
+
+            <div id="cenario">
+                <div id="tela-pausa" hidden role="dialog" aria-modal="true"
+                     aria-labelledby="titulo-pausa">
+                    <div class="painel-pausa">
+                        <h2 id="titulo-pausa">Jogo pausado</h2>
+                        <p>Respire um pouco. Sua jornada espera por você.</p>
+                        <button id="btn-retomar" type="button">Continuar jogando</button>
+                        <button id="btn-pausa-escolher" class="btn-secundario" type="button">
+                            Voltar à escolha das fases
+                        </button>
+                    </div>
+                </div>
+                <div id="mensagem-fase" aria-live="polite"></div>
+                <div id="objetos-cenario" aria-label="Obstáculos e nuvens"></div>
+
+                <div id="personagens">
+                    <img
+                        id="personagem-robozinho"
+                        src="Robozinho.png"
+                        alt="Robozinho"
+                    >
+                </div>
+
+                <div id="controles-jogo"
+                     aria-label="Controles do jogo">
+
+                    <button id="btn-esquerda" type="button"
+                            aria-label="Mover para a esquerda">
+                        ◀
+                    </button>
+
+                    <button id="btn-agachar" type="button">
+                        Agachar
+                    </button>
+
+                    <button id="btn-pular" type="button">
+                        Pular
+                    </button>
+
+                    <button id="btn-direita" type="button"
+                            aria-label="Mover para a direita">
+                        ▶
+                    </button>
+
+                    <button id="btn-biblia" type="button">
+                        Bíblia
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TELA DE FIM DE JOGO -->
+        <section id="tela-game-over" class="tela"
+                 aria-labelledby="titulo-game-over"
+                 hidden>
+            <div class="painel">
+                <h2 id="titulo-game-over">Não desista!</h2>
+
+                <p>
+                    Uma tentativa que terminou não encerra sua jornada.
+                    Levante-se, confie no Senhor e continue caminhando.
+                    A graça de Deus nos ensina a perseverar, mesmo quando
+                    enfrentamos dificuldades.
+                </p>
+
+                <p><strong>Referência: Provérbios 24:16.</strong></p>
+
+                <button id="btn-tentar-novamente" type="button">
+                    Tentar novamente
+                </button>
+
+                <button class="btn-secundario btn-menu" type="button">
+                    Voltar ao menu
+                </button>
+            </div>
+        </section>
+
+        <!-- TELA FINAL -->
+        <section id="tela-final" class="tela"
+                 aria-labelledby="titulo-final"
+                 hidden>
+            <div class="painel">
+                <img src="Telafinal.png"
+                     alt="Celebração ao final da jornada"
+                     class="imagem-final">
+
+                <h2 id="titulo-final">Até aqui o Senhor nos guiou!</h2>
+
+                <p>
+                    Deus, em sua graça, nos concede bênçãos e coloca
+                    irmãos ao nosso lado para nos encorajar, ajudar
+                    e fortalecer. Não desista diante dos desafios!
+                    Busque ao Senhor, confie em sua Palavra e continue
+                    caminhando com os olhos em Cristo.
+                </p>
+
+                <p>
+                    Quando precisar de orientação e crescimento
+                    espiritual, visite os materiais do Renova-me Deus Meu.
+                </p>
+
+                <blockquote>
+                    “O meu socorro vem do Senhor, que fez o céu e a terra.”
+                    <cite>Salmo 121:2</cite>
+                </blockquote>
+
+                <button id="btn-jogar-novamente" type="button">
+                    Jogar novamente
+                </button>
+
+                <button class="btn-secundario btn-menu" type="button">
+                    Voltar ao menu
+                </button>
+
+                <button id="btn-versiculo-final" class="btn-secundario"
+                        type="button">
+                    Versículo final
+                </button>
+
+                <p id="versiculo-final" hidden>
+                    “Corramos com perseverança a carreira que nos está
+                    proposta, olhando firmemente para Jesus.”
+                    <strong>Hebreus 12:1-2.</strong>
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
