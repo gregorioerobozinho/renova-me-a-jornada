@@ -1131,14 +1131,14 @@ html, body {
 /* Ajuste fino final: personagem principal e personagens de passagem.
    Aplicado somente às fases diferentes de 3 e 5. */
 #cenario:not(.fase-ajuste-estrada) #personagens {
-    bottom: 48px !important;
+    bottom: 60px !important;
 }
 #cenario:not(.fase-ajuste-estrada) .ator-amigo {
     bottom: 85px !important;
 }
 @media (max-width: 650px) {
     #cenario:not(.fase-ajuste-estrada) #personagens {
-        bottom: 48px !important;
+        bottom: 60px !important;
     }
     #cenario:not(.fase-ajuste-estrada) .ator-amigo {
         bottom: 85px !important;
