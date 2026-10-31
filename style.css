@@ -399,7 +399,7 @@ h2 {
 #personagens {
     position: absolute;
     right: 12%;
-    bottom: 68px;
+    bottom: 0px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -688,7 +688,7 @@ h2 {
 
 .ator-fera {
     z-index: 3;
-    bottom: 208px;
+    bottom: 278px;
     width: 184px;
     height: 208px;
 }
@@ -703,7 +703,7 @@ h2 {
 
 @media (max-width: 650px) {
     .ator-fera {
-        bottom: 252px;
+        bottom: 322px;
         width: 132px;
         height: 152px;
     }
@@ -1104,5 +1104,24 @@ html, body {
     }
     #cenario.fase-ajuste-estrada .ator-amigo {
         bottom: 28px;
+    }
+}
+
+
+
+/* Alinhamento final das fases comuns.
+   As fases 3 e 5 ficam explicitamente excluídas deste ajuste. */
+#cenario:not(.fase-ajuste-estrada) #personagens {
+    bottom: 0 !important;
+}
+#cenario:not(.fase-ajuste-estrada) .ator-fera {
+    bottom: 78px !important;
+}
+@media (max-width: 650px) {
+    #cenario:not(.fase-ajuste-estrada) #personagens {
+        bottom: 35px !important;
+    }
+    #cenario:not(.fase-ajuste-estrada) .ator-fera {
+        bottom: 78px !important;
     }
 }
