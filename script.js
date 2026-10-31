@@ -765,9 +765,53 @@ function ligarControle(id, comando, aoPressionar) {
 
 ligarControle("btn-esquerda", "esquerda");
 ligarControle("btn-direita", "direita");
-ligarControle("btn-agachar", "agachar");
+// O botão de agachar foi removido da interface móvel.
 ligarControle("btn-pular", "pular", iniciarPulo);
 ligarControle("btn-biblia", "biblia", lancarBiblia);
+
+// Em celulares, prioriza a orientação horizontal. Alguns navegadores só
+// permitem travar a orientação após uma ação explícita do jogador.
+let avisoOrientacaoCriado = false;
+async function solicitarTelaHorizontal() {
+    if (!/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return;
+    try {
+        if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock("landscape");
+        }
+    } catch (_) {
+        // O navegador pode não permitir bloqueio; nesse caso mostramos orientação.
+    }
+    atualizarAvisoOrientacao();
+}
+
+function atualizarAvisoOrientacao() {
+    if (!/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return;
+    let aviso = document.getElementById("aviso-gire-aparelho");
+    if (!aviso) {
+        aviso = document.createElement("div");
+        aviso.id = "aviso-gire-aparelho";
+        aviso.setAttribute("role", "status");
+        aviso.textContent = "Para jogar, vire o celular na horizontal.";
+        document.body.appendChild(aviso);
+    }
+    aviso.hidden = window.matchMedia("(orientation: landscape)").matches;
+}
+
+window.addEventListener("orientationchange", atualizarAvisoOrientacao);
+window.addEventListener("resize", atualizarAvisoOrientacao);
+document.addEventListener("DOMContentLoaded", atualizarAvisoOrientacao);
+
+// Solicita a orientação quando o jogador inicia/interage com o jogo.
+document.getElementById("btn-jogar")?.addEventListener("click", solicitarTelaHorizontal, { once: true });
+document.getElementById("btn-pular")?.addEventListener("pointerdown", solicitarTelaHorizontal, { once: true });
+
+// Evita menu de contexto, arraste/baixar imagem e seleção durante a partida.
+document.addEventListener("contextmenu", (evento) => {
+    if (evento.target.closest("#controles-jogo, #cenario, #personagens")) evento.preventDefault();
+});
+document.addEventListener("dragstart", (evento) => {
+    if (evento.target.closest("#controles-jogo, #cenario, #personagens") || evento.target.tagName === "IMG") evento.preventDefault();
+});
 
 // ---------- Pulo com altura variável ----------
 

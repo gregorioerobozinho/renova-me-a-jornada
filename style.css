@@ -824,3 +824,71 @@ html, body {
     .escada-celestial { right:8%; height:50%; }
     .fogo-celestial { width:28%; height:22%; }
 }
+
+
+/* Controles móveis simplificados: Bíblia e pulo à esquerda; direções à direita. */
+#controles-jogo {
+    justify-content: space-between;
+    align-items: center;
+    gap: clamp(8px, 2vw, 24px);
+    pointer-events: none;
+}
+#controles-jogo button {
+    pointer-events: auto;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: none;
+    -webkit-user-drag: none;
+}
+#btn-agachar { display: none !important; }
+#btn-biblia { order: 1; }
+#btn-pular { order: 2; }
+#btn-esquerda { order: 3; }
+#btn-direita { order: 4; }
+
+/* No celular deitado, comandos ficam nos cantos opostos da tela. */
+@media (max-width: 900px) and (orientation: landscape) {
+    #controles-jogo {
+        left: 0;
+        right: 0;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        display: flex;
+        justify-content: space-between;
+        padding: 0 clamp(8px, 2.5vw, 28px);
+        gap: clamp(8px, 2vw, 22px);
+    }
+    #btn-biblia, #btn-pular { margin-right: 8px; }
+    #btn-esquerda { margin-left: auto; }
+    #controles-jogo button { min-width: clamp(58px, 8vw, 88px); min-height: 48px; }
+}
+
+/* O jogo é apresentado apenas em paisagem nos celulares. */
+@media (max-width: 900px) and (orientation: portrait) {
+    #aviso-gire-aparelho {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 28px;
+        background: rgba(8, 15, 22, .97);
+        color: #fff;
+        text-align: center;
+        font-size: clamp(1.2rem, 5vw, 1.8rem);
+        font-weight: 700;
+    }
+    #aviso-gire-aparelho[hidden] { display: none !important; }
+}
+
+/* Impede seleção/realce e menu de toque durante a partida. */
+#tela-jogo, #cenario, #cenario img, #personagens, #personagens img,
+#controles-jogo, #controles-jogo * {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+#cenario img, #personagens img { -webkit-user-drag: none; user-drag: none; }
