@@ -194,8 +194,9 @@ let deslocamentoAcumulado = 0;
 const camadaObjetos = $("#objetos-cenario");
 const VIDA_MAXIMA = 7;
 const objetosCenario = [];
-let tempoProximoObjeto = 3;
-let tempoProximaFera = 5;
+let tempoProximaNuvemNegra = 4;
+let tempoProximaCaixa = 5;
+let tempoProximaFera = 6;
 let tempoProximaNuvemClara = 12;
 let tempoTotalObjetos = 0;
 let sequenciaObjetos = 0;
@@ -223,8 +224,9 @@ const SEQUENCIAS_AMIGOS = [
 function limparObjetos() {
     objetosCenario.forEach((obj) => obj.elemento.remove());
     objetosCenario.length = 0;
-    tempoProximoObjeto = 3;
-    tempoProximaFera = 5;
+    tempoProximaNuvemNegra = 4;
+    tempoProximaCaixa = 5;
+    tempoProximaFera = 6;
     tempoProximaNuvemClara = 12;
     tempoTotalObjetos = 0;
     sequenciaObjetos = 0;
@@ -304,8 +306,8 @@ function criarNuvemNegra() {
     elemento.appendChild(imagem);
     camadaObjetos.appendChild(elemento);
 
-    // Alterna as entradas. A nuvem sempre atravessa a tela no sentido
-    // em que Robozinho está voltado, vindo da borda oposta.
+    // A nuvem entra por uma das extremidades e mantém movimento próprio,
+    // acompanhando também o deslocamento do mundo quando a estrada rola.
     const direcao = ladoProximaNuvem;
     const largura = elemento.offsetWidth || 120;
     const x = direcao > 0 ? -largura - 8 : cenario.clientWidth + 8;
@@ -321,9 +323,8 @@ function criarNuvemNegra() {
 
 function criarFera() {
     const modelo = SEQUENCIAS_FERAS[Math.floor(Math.random() * SEQUENCIAS_FERAS.length)];
-    // A fera sempre vem de encontro à direção para a qual Robozinho está apontado.
-    // Se Robozinho olha para a direita, a fera entra pela direita e corre para a esquerda;
-    // se olha para a esquerda, entra pela esquerda e corre para a direita.
+    // A fera surge em uma extremidade e atravessa a cena com movimento próprio.
+    // O avanço do cenário é aplicado separadamente, sem prendê-la ao Robozinho.
     const direcao = -(ultimaDirecao || 1);
     ladoProximaFera = direcao;
     const elemento = document.createElement("div");
@@ -344,16 +345,8 @@ function criarFera() {
     const sequenciaInicial = direcao > 0 ? modelo.direita : modelo.esquerda;
     imagem.src = sequenciaInicial[0];
     imagem.onerror = () => {
-        // Se algum quadro da sequência não estiver disponível no site,
-        // mantém a Capivara visível usando seu sprite estático já existente.
-        if (modelo.nome === "Capivara" && !ator.quadroFalha) {
-            ator.quadroFalha = true;
-            imagem.onerror = null;
-            imagem.src = "Capivara.png";
-            imagem.alt = "";
-        } else {
-            imagem.style.display = "none";
-        }
+        console.error(`Não foi possível carregar o quadro ${imagem.getAttribute("src")} da fera ${modelo.nome}.`);
+        imagem.style.display = "none";
     };
     elemento.style.left = `${x}px`;
     ferasAtivas.push(ator);
@@ -384,7 +377,7 @@ function criarAmigo() {
 function atualizarAtoresMovel(lista, dt, tipo) {
     for (const ator of lista) {
         if (ator.removido) continue;
-        ator.x += ator.direcao * ator.velocidade * dt;
+        ator.x += ator.direcao * ator.velocidade * dt - (tipo === "fera" ? (fisica.deltaAvanco || 0) : 0);
         ator.tempo += dt;
         if (ator.tempo >= 0.11) {
             if (ator.quadroFalha) {
@@ -536,31 +529,26 @@ function atualizarTrechoCelestial(dt) {
 
 function atualizarObjetos(dt) {
     tempoTotalObjetos += dt;
-    tempoProximoObjeto -= dt;
+    tempoProximaNuvemNegra -= dt;
+    tempoProximaCaixa -= dt;
     tempoProximaFera -= dt;
     tempoProximaNuvemClara -= dt;
     tempoProximoAmigo -= dt;
 
-    // Caixotes e nuvens negras mantêm seu próprio ciclo de três segundos.
-    if (tempoProximoObjeto <= 0) {
-        if (!objetosCenario.some((item) => !item.removido && item.tipo === "caixote")) criarCaixote();
-        if (!objetosCenario.some((item) => !item.removido && item.tipo === "nuvem-negra")) criarNuvemNegra();
-        tempoProximoObjeto = 3;
+    // Surgimentos escalonados em TODAS as fases:
+    // nuvem escura aos 4s; caixa aos 5s; fera aos 6s.
+    // Depois da primeira aparição, cada categoria recebe uma nova a cada 4s.
+    if (tempoProximaNuvemNegra <= 0) {
+        criarNuvemNegra();
+        tempoProximaNuvemNegra += 4;
     }
-
-    // A frequência das feras aumenta progressivamente por fase.
-    // Fases 1-4: normal (5 s); fases 5-8: dobro (2,5 s);
-    // fases 9-10: triplo (aprox. 1,67 s). A velocidade de cada fera
-    // permanece inalterada; só muda o intervalo entre aparições.
-    const intervaloFera = fisica.fase >= 9 ? (5 / 3) : (fisica.fase >= 5 ? 2.5 : 5);
+    if (tempoProximaCaixa <= 0) {
+        criarCaixote();
+        tempoProximaCaixa += 4;
+    }
     if (tempoProximaFera <= 0) {
-        if (ferasAtivas.length === 0) {
-            criarFera();
-            tempoProximaFera = intervaloFera;
-        } else {
-            // Aguarda a fera atual sair ou ser atingida antes de criar outra.
-            tempoProximaFera = 0.25;
-        }
+        criarFera();
+        tempoProximaFera += 4;
     }
 
     // Uma nuvem branca por vez e intervalo maior entre coletas.
@@ -583,11 +571,11 @@ function atualizarObjetos(dt) {
     for (const objeto of objetosCenario) {
         if (objeto.removido) continue;
         if (objeto.tipo === "nuvem-negra") {
-            objeto.x += objeto.direcao * objeto.velocidade * dt;
+            objeto.x += objeto.direcao * objeto.velocidade * dt - (fisica.deltaAvanco || 0);
             if ((objeto.direcao > 0 && objeto.x > cenario.clientWidth + 140) ||
                 (objeto.direcao < 0 && objeto.x < -150)) removerObjeto(objeto);
         } else if (objeto.tipo === "caixote") {
-            objeto.x += (objeto.direcao > 0 ? -1 : 1) * objeto.velocidade * dt;
+            objeto.x += (objeto.direcao > 0 ? -1 : 1) * objeto.velocidade * dt - (fisica.deltaAvanco || 0);
             if ((objeto.direcao > 0 && objeto.x < -160) ||
                 (objeto.direcao < 0 && objeto.x > cenario.clientWidth + 100)) removerObjeto(objeto);
         } else {
