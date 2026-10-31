@@ -182,6 +182,12 @@ let ultimaDirecao = 1; // 1 = direita, -1 = esquerda
 let jaSeMoveu = false;
 let ultimoLancamento = 0;
 let jogoPausado = false;
+let emEstradaCelestial = false;
+let etapaEscada = "nenhuma";
+let tempoEtapaEscada = 0;
+let passagensCelestiais = 0;
+let camadaCelestial = null;
+let deslocamentoAcumulado = 0;
 
 
 // ---------- Caixotes, nuvens e vidas ----------
@@ -327,7 +333,10 @@ function criarFera() {
         elemento, imagem, modelo, x, direcao, quadro: 0, tempo: 0,
         velocidade: Math.max(70, fisica.velocidadeCenario * 0.5625), removido: false
     };
-    imagem.src = (direcao > 0 ? modelo.direita : modelo.esquerda)[0];
+    // Use a sequência desenhada para o sentido real do deslocamento.
+    // Não espelhar a sequência direita: isso fazia algumas feras parecerem andar de costas.
+    const sequenciaInicial = direcao > 0 ? modelo.direita : modelo.esquerda;
+    imagem.src = sequenciaInicial[0];
     elemento.style.left = `${x}px`;
     ferasAtivas.push(ator);
 }
@@ -364,7 +373,7 @@ function atualizarAtoresMovel(lista, dt, tipo) {
             ator.tempo = 0;
             const sequencia = ator.direcao > 0 ? ator.modelo.direita : ator.modelo.esquerda;
             ator.imagem.src = sequencia[ator.quadro];
-            if (ator.modelo.nome === "Robozinha") ator.imagem.style.transform = ator.direcao < 0 ? "scaleX(-1)" : "none";
+            // As feras já possuem quadros próprios para cada direção; não aplicar scaleX.
         }
         ator.elemento.style.left = `${ator.x}px`;
         if ((ator.direcao > 0 && ator.x > cenario.clientWidth + 110) ||
@@ -447,6 +456,50 @@ function verificarColisoesObjetos() {
     }
 }
 
+function iniciarTrechoCelestial() {
+    if (fisica.fase < 7 || passagensCelestiais >= 2 || etapaEscada !== "nenhuma") return;
+    passagensCelestiais += 1;
+    etapaEscada = "subindo";
+    tempoEtapaEscada = 0;
+    camadaCelestial = document.createElement("div");
+    camadaCelestial.className = "camada-celestial";
+    camadaCelestial.innerHTML = '<img class="estrada-celestial" src="EstradadoCeu.png" alt=""><img class="escada-celestial" src="Escada2.png" alt=""><img class="fogo-celestial" src="Fogo.png" alt="">';
+    cenario.appendChild(camadaCelestial);
+}
+
+function atualizarTrechoCelestial(dt) {
+    if (fisica.fase < 7) return;
+    // Duas travessias curtas por fase, iniciadas durante a progressão.
+    const gatilhos = [1400, 3300];
+    if (etapaEscada === "nenhuma" && passagensCelestiais < 2 && fisica.posicaoCenario >= gatilhos[passagensCelestiais]) iniciarTrechoCelestial();
+    if (etapaEscada === "nenhuma") return;
+    tempoEtapaEscada += dt;
+    if (etapaEscada === "subindo" && tempoEtapaEscada >= 2.5) {
+        emEstradaCelestial = true;
+        etapaEscada = "em-cima";
+        tempoEtapaEscada = 0;
+        if (camadaCelestial) {
+            camadaCelestial.classList.add("no-alto");
+            const escada = camadaCelestial.querySelector(".escada-celestial");
+            if (escada) escada.src = "Escada3.png";
+        }
+        personagens.classList.add("personagem-no-alto");
+        mensagemFase.textContent = "Robozinho alcançou a estrada celestial!";
+    } else if (etapaEscada === "em-cima" && tempoEtapaEscada >= 10) {
+        etapaEscada = "descendo";
+        tempoEtapaEscada = 0;
+        emEstradaCelestial = false;
+        personagens.classList.remove("personagem-no-alto");
+        if (camadaCelestial) camadaCelestial.classList.remove("no-alto");
+    } else if (etapaEscada === "descendo" && tempoEtapaEscada >= 2.5) {
+        etapaEscada = "nenhuma";
+        tempoEtapaEscada = 0;
+        if (camadaCelestial) camadaCelestial.remove();
+        camadaCelestial = null;
+        mensagemFase.textContent = "De volta à estrada!";
+    }
+}
+
 function atualizarObjetos(dt) {
     tempoTotalObjetos += dt;
     tempoProximoObjeto -= dt;
@@ -462,7 +515,7 @@ function atualizarObjetos(dt) {
         tempoProximoObjeto = 3;
     }
     if (tempoProximaNuvemClara <= 0) {
-        criarObjetoCenario();
+        if (!emEstradaCelestial) criarObjetoCenario();
         tempoProximaNuvemClara = 5;
     }
     if (tempoProximoAmigo <= 0) {
@@ -477,11 +530,11 @@ function atualizarObjetos(dt) {
             if ((objeto.direcao > 0 && objeto.x > cenario.clientWidth + 140) ||
                 (objeto.direcao < 0 && objeto.x < -150)) removerObjeto(objeto);
         } else if (objeto.tipo === "caixote") {
-            objeto.x += (objeto.direcao > 0 ? -1 : 1) * fisica.velocidadeCenario * dt;
+            objeto.x += (objeto.direcao > 0 ? -1 : 1) * (fisica.deltaAvanco || 0);
             if ((objeto.direcao > 0 && objeto.x < -160) ||
                 (objeto.direcao < 0 && objeto.x > cenario.clientWidth + 100)) removerObjeto(objeto);
         } else {
-            objeto.x -= fisica.velocidadeCenario * dt;
+            objeto.x -= (fisica.deltaAvanco || 0);
             if (objeto.x < -160) removerObjeto(objeto);
         }
         objeto.elemento.style.left = `${objeto.x}px`;
@@ -551,6 +604,15 @@ function prepararFase(fase = fisica.fase) {
     fisica.faseIniciada = false;
     fisica.tempoFase = 0;
     fisica.posicaoCenario = 0;
+    deslocamentoAcumulado = 0;
+    fisica.deltaAvanco = 0;
+    emEstradaCelestial = false;
+    etapaEscada = "nenhuma";
+    tempoEtapaEscada = 0;
+    passagensCelestiais = 0;
+    if (camadaCelestial) camadaCelestial.remove();
+    camadaCelestial = null;
+    personagens.classList.remove("personagem-no-alto");
     fisica.vidas = 7;
     fisica.invulneravelAte = 0;
     ultimaDirecao = 1;
@@ -836,22 +898,20 @@ function atualizarMovimento(dt) {
         Math.min(fisica.velocidadeMaxima, fisica.velocidadeX)
     );
 
-    // O cenário continua avançando mesmo sem pressionar controles.
-    fisica.posicaoCenario += fisica.velocidadeCenario * dt;
-
-    fisica.posicaoX +=
-        (fisica.velocidadeX - fisica.velocidadeCenario) * dt;
-
+    // Teste de progressão: Robozinho avança pela tela; ao alcançar a metade,
+    // o mundo começa a rolar. O cenário nunca retrocede quando ele volta.
+    fisica.deltaAvanco = 0;
+    fisica.posicaoX += fisica.velocidadeX * dt;
     const limiteEsquerdo = 10;
-    const limiteDireito = Math.max(
-        limiteEsquerdo,
-        cenario.clientWidth - personagem.clientWidth - 10
-    );
-
-    fisica.posicaoX = Math.max(
-        limiteEsquerdo,
-        Math.min(limiteDireito, fisica.posicaoX)
-    );
+    const limiteDireito = Math.max(limiteEsquerdo, cenario.clientWidth * 0.5 - personagem.clientWidth / 2);
+    if (fisica.posicaoX > limiteDireito) {
+        const excesso = fisica.posicaoX - limiteDireito;
+        fisica.posicaoX = limiteDireito;
+        deslocamentoAcumulado += excesso;
+        fisica.deltaAvanco = excesso;
+        fisica.posicaoCenario = deslocamentoAcumulado;
+    }
+    fisica.posicaoX = Math.max(limiteEsquerdo, fisica.posicaoX);
 
     // Calcula a largura de cada imagem na altura atual do cenário.
     const altura = cenario.clientHeight;
@@ -961,6 +1021,7 @@ function loopJogo(agora) {
         fisica.tempoFase += dt;
 
         atualizarMovimento(dt);
+        atualizarTrechoCelestial(dt);
         atualizarPulo(dt);
         atualizarObjetos(dt);
 
