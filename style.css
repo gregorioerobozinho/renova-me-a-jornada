@@ -1081,7 +1081,7 @@ html, body {
 /* Ajuste de estrada exclusivo das fases 3 e 5.
    Nas demais fases, os posicionamentos originais são preservados. */
 #cenario.fase-ajuste-estrada #personagens {
-    bottom: 0;
+    bottom: 12px;
 }
 #cenario.fase-ajuste-estrada .objeto-caixote,
 #cenario.fase-ajuste-estrada .ator-fera {
@@ -1097,7 +1097,7 @@ html, body {
     #cenario.fase-ajuste-estrada #personagens,
     #cenario.fase-ajuste-estrada .objeto-caixote,
     #cenario.fase-ajuste-estrada .ator-fera {
-        bottom: 0;
+        bottom: 12px;
     }
     #cenario.fase-ajuste-estrada .objeto-nuvem-negra {
         bottom: 34px;
