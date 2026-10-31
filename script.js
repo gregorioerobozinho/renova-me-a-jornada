@@ -276,7 +276,11 @@ function criarCaixote() {
     const x = direcao > 0 ? cenario.clientWidth + 30 : -90;
     elemento.style.left = `${x}px`;
     camadaObjetos.appendChild(elemento);
-    objetosCenario.push({ elemento, tipo: "caixote", x, direcao, removido: false });
+    objetosCenario.push({
+        elemento, tipo: "caixote", x, direcao,
+        velocidade: Math.max(70, fisica.velocidadeCenario * 0.5625),
+        removido: false
+    });
 }
 
 function criarNuvemNegra() {
@@ -307,7 +311,7 @@ function criarNuvemNegra() {
     const x = direcao > 0 ? -largura - 8 : cenario.clientWidth + 8;
     const objeto = {
         elemento, tipo: "nuvem-negra", x, direcao,
-        velocidade: Math.max(172, fisica.velocidadeCenario * 1.5),
+        velocidade: Math.max(70, fisica.velocidadeCenario * 0.5625),
         removido: false
     };
     elemento.style.left = `${objeto.x}px`;
@@ -339,6 +343,18 @@ function criarFera() {
     // Não espelhar a sequência direita: isso fazia algumas feras parecerem andar de costas.
     const sequenciaInicial = direcao > 0 ? modelo.direita : modelo.esquerda;
     imagem.src = sequenciaInicial[0];
+    imagem.onerror = () => {
+        // Se algum quadro da sequência não estiver disponível no site,
+        // mantém a Capivara visível usando seu sprite estático já existente.
+        if (modelo.nome === "Capivara" && !ator.quadroFalha) {
+            ator.quadroFalha = true;
+            imagem.onerror = null;
+            imagem.src = "Capivara.png";
+            imagem.alt = "";
+        } else {
+            imagem.style.display = "none";
+        }
+    };
     elemento.style.left = `${x}px`;
     ferasAtivas.push(ator);
 }
@@ -371,6 +387,11 @@ function atualizarAtoresMovel(lista, dt, tipo) {
         ator.x += ator.direcao * ator.velocidade * dt;
         ator.tempo += dt;
         if (ator.tempo >= 0.11) {
+            if (ator.quadroFalha) {
+                ator.tempo = 0;
+                ator.elemento.style.left = `${ator.x}px`;
+                continue;
+            }
             ator.quadro = (ator.quadro + 1) % 3;
             ator.tempo = 0;
             const sequencia = ator.direcao > 0 ? ator.modelo.direita : ator.modelo.esquerda;
@@ -459,7 +480,7 @@ function verificarColisoesObjetos() {
 }
 
 function iniciarTrechoCelestial() {
-    if (fisica.fase < 7 || passagensCelestiais >= 2 || etapaEscada !== "nenhuma") return;
+    if (fisica.fase !== 10 || passagensCelestiais >= 2 || etapaEscada !== "nenhuma") return;
     passagensCelestiais += 1;
     etapaEscada = "subindo";
     tempoEtapaEscada = 0;
@@ -470,8 +491,19 @@ function iniciarTrechoCelestial() {
 }
 
 function atualizarTrechoCelestial(dt) {
-    if (fisica.fase < 7) return;
-    // Duas travessias curtas por fase, iniciadas durante a progressão.
+    // O trecho especial foi retirado das fases 7, 8 e 9.
+    // Fogo, escada e estrada celestial aparecem somente na fase 10.
+    if (fisica.fase !== 10) {
+        if (camadaCelestial) camadaCelestial.remove();
+        camadaCelestial = null;
+        emEstradaCelestial = false;
+        etapaEscada = "nenhuma";
+        tempoEtapaEscada = 0;
+        passagensCelestiais = 0;
+        personagens.classList.remove("personagem-no-alto");
+        return;
+    }
+    // Duas travessias curtas na fase 10, iniciadas durante a progressão.
     const gatilhos = [1400, 3300];
     if (etapaEscada === "nenhuma" && passagensCelestiais < 2 && fisica.posicaoCenario >= gatilhos[passagensCelestiais]) iniciarTrechoCelestial();
     if (etapaEscada === "nenhuma") return;
@@ -516,14 +548,18 @@ function atualizarObjetos(dt) {
         tempoProximoObjeto = 3;
     }
 
-    // Feras aparecem separadamente, com intervalo de cinco segundos.
-    // Não cria outra enquanto a anterior ainda estiver atravessando a tela.
+    // A frequência das feras aumenta progressivamente por fase.
+    // Fases 1-4: normal (5 s); fases 5-8: dobro (2,5 s);
+    // fases 9-10: triplo (aprox. 1,67 s). A velocidade de cada fera
+    // permanece inalterada; só muda o intervalo entre aparições.
+    const intervaloFera = fisica.fase >= 9 ? (5 / 3) : (fisica.fase >= 5 ? 2.5 : 5);
     if (tempoProximaFera <= 0) {
         if (ferasAtivas.length === 0) {
             criarFera();
-            tempoProximaFera = 5;
+            tempoProximaFera = intervaloFera;
         } else {
-            tempoProximaFera = 1;
+            // Aguarda a fera atual sair ou ser atingida antes de criar outra.
+            tempoProximaFera = 0.25;
         }
     }
 
@@ -551,7 +587,7 @@ function atualizarObjetos(dt) {
             if ((objeto.direcao > 0 && objeto.x > cenario.clientWidth + 140) ||
                 (objeto.direcao < 0 && objeto.x < -150)) removerObjeto(objeto);
         } else if (objeto.tipo === "caixote") {
-            objeto.x += (objeto.direcao > 0 ? -1 : 1) * (fisica.deltaAvanco || 0);
+            objeto.x += (objeto.direcao > 0 ? -1 : 1) * objeto.velocidade * dt;
             if ((objeto.direcao > 0 && objeto.x < -160) ||
                 (objeto.direcao < 0 && objeto.x > cenario.clientWidth + 100)) removerObjeto(objeto);
         } else {
