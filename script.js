@@ -103,6 +103,31 @@ const indicadorFase = $("#indicador-fase");
 const botaoPausar = $("#btn-pausar");
 const telaPausa = $("#tela-pausa");
 
+// Pontuação da fase: exibida separadamente das mensagens de vida.
+let pontuacao = 0;
+const painelPontuacao = document.createElement("div");
+painelPontuacao.id = "painel-pontuacao";
+painelPontuacao.setAttribute("aria-label", "Pontuação");
+painelPontuacao.textContent = "0";
+cenario.appendChild(painelPontuacao);
+
+const resultadoFinal = document.createElement("div");
+resultadoFinal.id = "resultado-final";
+resultadoFinal.innerHTML = '<h2>Parabéns!</h2><p>Você concluiu esta jornada!</p><p class="pontuacao-final"></p>';
+const painelFinal = $("#tela-final .painel") || $("#tela-final");
+if (painelFinal) painelFinal.appendChild(resultadoFinal);
+
+function atualizarPontuacao() {
+    painelPontuacao.textContent = String(pontuacao);
+    const campoFinal = resultadoFinal.querySelector(".pontuacao-final");
+    if (campoFinal) campoFinal.textContent = `Pontuação alcançada: ${pontuacao} pontos`;
+}
+
+function adicionarPontos(valor) {
+    pontuacao += valor;
+    atualizarPontuacao();
+}
+
 function pausarJogo() {
     if ($("#tela-jogo").hidden) return;
     jogoPausado = !jogoPausado;
@@ -194,9 +219,8 @@ let deslocamentoAcumulado = 0;
 const camadaObjetos = $("#objetos-cenario");
 const VIDA_MAXIMA = 7;
 const objetosCenario = [];
-let tempoProximaNuvemNegra = 4;
-let tempoProximaCaixa = 5;
-let tempoProximaFera = 6;
+let tempoProximoObjeto = 3;
+let tempoProximaFera = 5;
 let tempoProximaNuvemClara = 12;
 let tempoTotalObjetos = 0;
 let sequenciaObjetos = 0;
@@ -224,9 +248,8 @@ const SEQUENCIAS_AMIGOS = [
 function limparObjetos() {
     objetosCenario.forEach((obj) => obj.elemento.remove());
     objetosCenario.length = 0;
-    tempoProximaNuvemNegra = 4;
-    tempoProximaCaixa = 5;
-    tempoProximaFera = 6;
+    tempoProximoObjeto = 3;
+    tempoProximaFera = 5;
     tempoProximaNuvemClara = 12;
     tempoTotalObjetos = 0;
     sequenciaObjetos = 0;
@@ -306,8 +329,8 @@ function criarNuvemNegra() {
     elemento.appendChild(imagem);
     camadaObjetos.appendChild(elemento);
 
-    // A nuvem entra por uma das extremidades e mantém movimento próprio,
-    // acompanhando também o deslocamento do mundo quando a estrada rola.
+    // Alterna as entradas. A nuvem sempre atravessa a tela no sentido
+    // em que Robozinho está voltado, vindo da borda oposta.
     const direcao = ladoProximaNuvem;
     const largura = elemento.offsetWidth || 120;
     const x = direcao > 0 ? -largura - 8 : cenario.clientWidth + 8;
@@ -323,8 +346,9 @@ function criarNuvemNegra() {
 
 function criarFera() {
     const modelo = SEQUENCIAS_FERAS[Math.floor(Math.random() * SEQUENCIAS_FERAS.length)];
-    // A fera surge em uma extremidade e atravessa a cena com movimento próprio.
-    // O avanço do cenário é aplicado separadamente, sem prendê-la ao Robozinho.
+    // A fera sempre vem de encontro à direção para a qual Robozinho está apontado.
+    // Se Robozinho olha para a direita, a fera entra pela direita e corre para a esquerda;
+    // se olha para a esquerda, entra pela esquerda e corre para a direita.
     const direcao = -(ultimaDirecao || 1);
     ladoProximaFera = direcao;
     const elemento = document.createElement("div");
@@ -345,8 +369,16 @@ function criarFera() {
     const sequenciaInicial = direcao > 0 ? modelo.direita : modelo.esquerda;
     imagem.src = sequenciaInicial[0];
     imagem.onerror = () => {
-        console.error(`Não foi possível carregar o quadro ${imagem.getAttribute("src")} da fera ${modelo.nome}.`);
-        imagem.style.display = "none";
+        // Se algum quadro da sequência não estiver disponível no site,
+        // mantém a Capivara visível usando seu sprite estático já existente.
+        if (modelo.nome === "Capivara" && !ator.quadroFalha) {
+            ator.quadroFalha = true;
+            imagem.onerror = null;
+            imagem.src = "Capivara.png";
+            imagem.alt = "";
+        } else {
+            imagem.style.display = "none";
+        }
     };
     elemento.style.left = `${x}px`;
     ferasAtivas.push(ator);
@@ -366,7 +398,7 @@ function criarAmigo() {
     const x = direcao > 0 ? -100 : cenario.clientWidth + 10;
     const ator = {
         elemento, imagem, modelo, x, direcao, quadro: 0, tempo: 0,
-        velocidade: Math.max(520, fisica.velocidadeCenario * 5.5), removido: false
+        velocidade: Math.max(260, fisica.velocidadeCenario * 2.75), removido: false
     };
     imagem.src = (direcao > 0 ? modelo.direita : modelo.esquerda)[0];
     if (modelo.nome === "Robozinha" && direcao < 0) imagem.style.transform = "scaleX(-1)";
@@ -377,9 +409,9 @@ function criarAmigo() {
 function atualizarAtoresMovel(lista, dt, tipo) {
     for (const ator of lista) {
         if (ator.removido) continue;
-        ator.x += ator.direcao * ator.velocidade * dt - (tipo === "fera" ? (fisica.deltaAvanco || 0) : 0);
+        ator.x += ator.direcao * ator.velocidade * dt;
         ator.tempo += dt;
-        if (ator.tempo >= 0.11) {
+        if (ator.tempo >= (tipo === "amigo" ? 0.22 : 0.11)) {
             if (ator.quadroFalha) {
                 ator.tempo = 0;
                 ator.elemento.style.left = `${ator.x}px`;
@@ -434,6 +466,7 @@ function atualizarVidas(delta, motivo) {
     atualizarHUD();
 
     if (fisica.vidas < antes) {
+        adicionarPontos(-100);
         mensagemFase.textContent = motivo || "Você perdeu uma vida! Continue com cuidado.";
     } else if (fisica.vidas > antes) {
         mensagemFase.textContent = motivo || "Você conquistou uma vida!";
@@ -455,6 +488,7 @@ function verificarColisoesObjetos() {
         if (!tocou) continue;
 
         if (objeto.tipo === "nuvem-clara") {
+            adicionarPontos(30);
             atualizarVidas(1, "Nuvem branca! Você conquistou uma vida.");
             removerObjeto(objeto);
         } else if (objeto.tipo === "caixote") {
@@ -473,82 +507,55 @@ function verificarColisoesObjetos() {
 }
 
 function iniciarTrechoCelestial() {
-    if (fisica.fase !== 10 || passagensCelestiais >= 2 || etapaEscada !== "nenhuma") return;
-    passagensCelestiais += 1;
-    etapaEscada = "subindo";
+    // A fase 10 segue o mesmo percurso terrestre das fases 8 e 9.
+    // Não criar escada, fogo ou estrada celestial nesta fase.
+    if (camadaCelestial) camadaCelestial.remove();
+    camadaCelestial = null;
+    emEstradaCelestial = false;
+    etapaEscada = "nenhuma";
     tempoEtapaEscada = 0;
-    camadaCelestial = document.createElement("div");
-    camadaCelestial.className = "camada-celestial";
-    camadaCelestial.innerHTML = '<img class="estrada-celestial" src="EstradadoCeu.png" alt=""><img class="escada-celestial" src="Escada2.png" alt=""><img class="fogo-celestial" src="Fogo.png" alt="">';
-    cenario.appendChild(camadaCelestial);
+    personagens.classList.remove("personagem-no-alto");
 }
 
-function atualizarTrechoCelestial(dt) {
-    // O trecho especial foi retirado das fases 7, 8 e 9.
-    // Fogo, escada e estrada celestial aparecem somente na fase 10.
-    if (fisica.fase !== 10) {
-        if (camadaCelestial) camadaCelestial.remove();
-        camadaCelestial = null;
-        emEstradaCelestial = false;
-        etapaEscada = "nenhuma";
-        tempoEtapaEscada = 0;
-        passagensCelestiais = 0;
-        personagens.classList.remove("personagem-no-alto");
-        return;
-    }
-    // Duas travessias curtas na fase 10, iniciadas durante a progressão.
-    const gatilhos = [1400, 3300];
-    if (etapaEscada === "nenhuma" && passagensCelestiais < 2 && fisica.posicaoCenario >= gatilhos[passagensCelestiais]) iniciarTrechoCelestial();
-    if (etapaEscada === "nenhuma") return;
-    tempoEtapaEscada += dt;
-    if (etapaEscada === "subindo" && tempoEtapaEscada >= 2.5) {
-        emEstradaCelestial = true;
-        etapaEscada = "em-cima";
-        tempoEtapaEscada = 0;
-        if (camadaCelestial) {
-            camadaCelestial.classList.add("no-alto");
-            const escada = camadaCelestial.querySelector(".escada-celestial");
-            if (escada) escada.src = "Escada3.png";
-        }
-        personagens.classList.add("personagem-no-alto");
-        mensagemFase.textContent = "Robozinho alcançou a estrada celestial!";
-    } else if (etapaEscada === "em-cima" && tempoEtapaEscada >= 10) {
-        etapaEscada = "descendo";
-        tempoEtapaEscada = 0;
-        emEstradaCelestial = false;
-        personagens.classList.remove("personagem-no-alto");
-        if (camadaCelestial) camadaCelestial.classList.remove("no-alto");
-    } else if (etapaEscada === "descendo" && tempoEtapaEscada >= 2.5) {
-        etapaEscada = "nenhuma";
-        tempoEtapaEscada = 0;
-        if (camadaCelestial) camadaCelestial.remove();
-        camadaCelestial = null;
-        mensagemFase.textContent = "De volta à estrada!";
-    }
+function atualizarTrechoCelestial() {
+    // Trechos celestiais desativados: impede que escada, fogo e estrada
+    // superior reapareçam durante a fase 10.
+    if (camadaCelestial) camadaCelestial.remove();
+    camadaCelestial = null;
+    emEstradaCelestial = false;
+    etapaEscada = "nenhuma";
+    tempoEtapaEscada = 0;
+    passagensCelestiais = 0;
+    personagens.classList.remove("personagem-no-alto");
 }
 
 function atualizarObjetos(dt) {
     tempoTotalObjetos += dt;
-    tempoProximaNuvemNegra -= dt;
-    tempoProximaCaixa -= dt;
+    tempoProximoObjeto -= dt;
     tempoProximaFera -= dt;
     tempoProximaNuvemClara -= dt;
     tempoProximoAmigo -= dt;
 
-    // Surgimentos escalonados em TODAS as fases:
-    // nuvem escura aos 4s; caixa aos 5s; fera aos 6s.
-    // Depois da primeira aparição, cada categoria recebe uma nova a cada 4s.
-    if (tempoProximaNuvemNegra <= 0) {
-        criarNuvemNegra();
-        tempoProximaNuvemNegra += 4;
+    // Caixotes e nuvens negras mantêm seu próprio ciclo de três segundos.
+    if (tempoProximoObjeto <= 0) {
+        if (!objetosCenario.some((item) => !item.removido && item.tipo === "caixote")) criarCaixote();
+        if (!objetosCenario.some((item) => !item.removido && item.tipo === "nuvem-negra")) criarNuvemNegra();
+        tempoProximoObjeto = 3;
     }
-    if (tempoProximaCaixa <= 0) {
-        criarCaixote();
-        tempoProximaCaixa += 4;
-    }
+
+    // A frequência das feras aumenta progressivamente por fase.
+    // Fases 1-4: normal (5 s); fases 5-8: dobro (2,5 s);
+    // fases 9-10: triplo (aprox. 1,67 s). A velocidade de cada fera
+    // permanece inalterada; só muda o intervalo entre aparições.
+    const intervaloFera = fisica.fase >= 9 ? (5 / 3) : (fisica.fase >= 5 ? 2.5 : 5);
     if (tempoProximaFera <= 0) {
-        criarFera();
-        tempoProximaFera += 4;
+        if (ferasAtivas.length === 0) {
+            criarFera();
+            tempoProximaFera = intervaloFera;
+        } else {
+            // Aguarda a fera atual sair ou ser atingida antes de criar outra.
+            tempoProximaFera = 0.25;
+        }
     }
 
     // Uma nuvem branca por vez e intervalo maior entre coletas.
@@ -571,11 +578,11 @@ function atualizarObjetos(dt) {
     for (const objeto of objetosCenario) {
         if (objeto.removido) continue;
         if (objeto.tipo === "nuvem-negra") {
-            objeto.x += objeto.direcao * objeto.velocidade * dt - (fisica.deltaAvanco || 0);
+            objeto.x += objeto.direcao * objeto.velocidade * dt;
             if ((objeto.direcao > 0 && objeto.x > cenario.clientWidth + 140) ||
                 (objeto.direcao < 0 && objeto.x < -150)) removerObjeto(objeto);
         } else if (objeto.tipo === "caixote") {
-            objeto.x += (objeto.direcao > 0 ? -1 : 1) * objeto.velocidade * dt - (fisica.deltaAvanco || 0);
+            objeto.x += (objeto.direcao > 0 ? -1 : 1) * objeto.velocidade * dt;
             if ((objeto.direcao > 0 && objeto.x < -160) ||
                 (objeto.direcao < 0 && objeto.x > cenario.clientWidth + 100)) removerObjeto(objeto);
         } else {
@@ -604,7 +611,10 @@ function acertarObjetoComBiblia(biblia) {
         const alvo = objeto.elemento.getBoundingClientRect();
         const atingiu = tiro.left <= alvo.right && tiro.right >= alvo.left &&
             tiro.top <= alvo.bottom && tiro.bottom >= alvo.top;
-        if (atingiu) removerObjeto(objeto);
+        if (atingiu) {
+            adicionarPontos(20);
+            removerObjeto(objeto);
+        }
     }
 
     // Percorre todas as feras, sem depender do nome ou da ordem da lista.
@@ -615,6 +625,7 @@ function acertarObjetoComBiblia(biblia) {
         const atingiu = tiro.left <= alvo.right && tiro.right >= alvo.left &&
             tiro.top <= alvo.bottom && tiro.bottom >= alvo.top;
         if (atingiu) {
+            adicionarPontos(20);
             fera.elemento.remove();
             fera.removido = true;
         }
@@ -659,6 +670,8 @@ function prepararFase(fase = fisica.fase) {
     camadaCelestial = null;
     personagens.classList.remove("personagem-no-alto");
     fisica.vidas = 7;
+    pontuacao = 0;
+    atualizarPontuacao();
     fisica.invulneravelAte = 0;
     ultimaDirecao = 1;
     jaSeMoveu = false;
@@ -1155,6 +1168,7 @@ function loopJogo(agora) {
         // Mantém a duração já definida: dois minutos e trinta segundos.
         if (fisica.tempoFase >= 300) {
             pararFase();
+            atualizarPontuacao();
             mostrarTela("tela-final");
             return;
         }
