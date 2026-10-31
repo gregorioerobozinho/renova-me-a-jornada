@@ -399,7 +399,7 @@ h2 {
 #personagens {
     position: absolute;
     right: 12%;
-    bottom: 0;
+    bottom: 85px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -607,7 +607,7 @@ h2 {
 .objeto-caixote {
     width: 76px;
     height: 76px;
-    bottom: 0;
+    bottom: 68px;
     background: transparent;
 }
 
@@ -648,7 +648,7 @@ h2 {
 .objeto-nuvem-negra {
     width: 120px;
     height: 78px;
-    bottom: 48px;
+    bottom: 68px;
     overflow: hidden;
 }
 
@@ -662,9 +662,9 @@ h2 {
 }
 
 @media (max-width: 650px) {
-    .objeto-caixote { width: 40px; height: 40px; bottom: 0; }
+    .objeto-caixote { width: 40px; height: 40px; bottom: 112px; }
     .objeto-nuvem, .objeto-nuvem-clara { width: 105px; height: 69px; bottom: 240px; }
-    .objeto-nuvem-negra { width: 84px; height: 55px; bottom: 34px; }
+    .objeto-nuvem-negra { width: 84px; height: 55px; bottom: 112px; }
 }
 
 /* Personagens de passagem e feras em movimento */
@@ -688,14 +688,14 @@ h2 {
 
 .ator-fera {
     z-index: 3;
-    bottom: 0;
+    bottom: 68px;
     width: 184px;
     height: 208px;
 }
 
 .ator-amigo {
     z-index: 2;
-    bottom: 75px;
+    bottom: 160px;
     width: 78px;
     height: 92px;
     opacity: .98;
@@ -703,12 +703,12 @@ h2 {
 
 @media (max-width: 650px) {
     .ator-fera {
-        bottom: 0;
+        bottom: 112px;
         width: 132px;
         height: 152px;
     }
     .ator-amigo {
-        bottom: 28px;
+        bottom: 180px;
         width: 58px;
         height: 68px;
     }
@@ -1074,5 +1074,35 @@ html, body {
         min-width: 72px;
         padding: 8px 10px;
         font-size: 0.9rem;
+    }
+}
+
+
+/* Ajuste de estrada exclusivo das fases 3 e 5.
+   Nas demais fases, os posicionamentos originais são preservados. */
+#cenario.fase-ajuste-estrada #personagens {
+    bottom: 0;
+}
+#cenario.fase-ajuste-estrada .objeto-caixote,
+#cenario.fase-ajuste-estrada .ator-fera {
+    bottom: 0;
+}
+#cenario.fase-ajuste-estrada .objeto-nuvem-negra {
+    bottom: 48px;
+}
+#cenario.fase-ajuste-estrada .ator-amigo {
+    bottom: 75px;
+}
+@media (max-width: 650px) {
+    #cenario.fase-ajuste-estrada #personagens,
+    #cenario.fase-ajuste-estrada .objeto-caixote,
+    #cenario.fase-ajuste-estrada .ator-fera {
+        bottom: 0;
+    }
+    #cenario.fase-ajuste-estrada .objeto-nuvem-negra {
+        bottom: 34px;
+    }
+    #cenario.fase-ajuste-estrada .ator-amigo {
+        bottom: 28px;
     }
 }

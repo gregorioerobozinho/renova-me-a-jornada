@@ -682,7 +682,8 @@ function prepararFase(fase = fisica.fase) {
 
     personagens.style.left = "0px";
     personagens.style.right = "auto";
-    personagens.style.bottom = "0px";
+    personagens.style.bottom = "";
+    cenario.classList.toggle("fase-ajuste-estrada", [3, 5].includes(fase));
 
     personagem.src = "Robozinho1.png";
     personagem.style.transform = "translateY(0) scaleY(1)";
@@ -962,16 +963,32 @@ function lancarBiblia() {
     biblia.className = "biblia-projetil";
     const larguraBiblia = 38;
     const alturaBiblia = 38;
+    const cenarioRect = cenario.getBoundingClientRect();
+    const roboRect = personagem.getBoundingClientRect();
+    const bordaEsquerda = cenario.clientLeft;
+    const bordaSuperior = cenario.clientTop;
     const inicioX = direcao > 0
-        ? fisica.posicaoX + personagem.offsetWidth - 4
-        : fisica.posicaoX - larguraBiblia + 4;
-    const alturaInicial = fisica.alturaPulo;
+        ? roboRect.right - cenarioRect.left - bordaEsquerda - 5
+        : roboRect.left - cenarioRect.left - bordaEsquerda - larguraBiblia + 5;
+    const centroVerticalRobo = roboRect.top + roboRect.height * 0.50;
+    const topoDisparo = Math.max(
+        0,
+        centroVerticalRobo - cenarioRect.top - bordaSuperior - alturaBiblia / 2
+    );
     Object.assign(biblia.style, {
-        position: "absolute", left: `${inicioX}px`,
-        bottom: `${100 - alturaInicial}px`,
-        width: `${larguraBiblia}px`, height: `${alturaBiblia}px`,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: "30px", lineHeight: "1", zIndex: "5", pointerEvents: "none"
+        position: "absolute",
+        left: `${inicioX}px`,
+        top: `${topoDisparo}px`,
+        bottom: "auto",
+        width: `${larguraBiblia}px`,
+        height: `${alturaBiblia}px`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "30px",
+        lineHeight: "1",
+        zIndex: "5",
+        pointerEvents: "none"
     });
     cenario.appendChild(biblia);
     bibliasAtivas.add(biblia);
