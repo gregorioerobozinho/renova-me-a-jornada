@@ -374,7 +374,7 @@ function criarFera() {
         if (modelo.nome === "Capivara" && !ator.quadroFalha) {
             ator.quadroFalha = true;
             imagem.onerror = null;
-            imagem.src = "Capivara.png";
+            imagem.src = "Capivara2.png";
             imagem.alt = "";
         } else {
             imagem.style.display = "none";
@@ -497,6 +497,10 @@ function verificarColisoesObjetos() {
                 removerObjeto(objeto);
             }
         } else if (objeto.tipo === "nuvem-negra") {
+            // Agachado, Robozinho passa por baixo da nuvem escura.
+            if (fisica.agachado && fisica.noChao) {
+                continue;
+            }
             atualizarVidas(-1, "Uma nuvem negra atingiu você! Cuidado.");
             removerObjeto(objeto);
         }
@@ -678,7 +682,7 @@ function prepararFase(fase = fisica.fase) {
 
     personagens.style.left = "0px";
     personagens.style.right = "auto";
-    personagens.style.bottom = "85px";
+    personagens.style.bottom = "0px";
 
     personagem.src = "Robozinho1.png";
     personagem.style.transform = "translateY(0) scaleY(1)";
@@ -823,7 +827,7 @@ function ligarControle(id, comando, aoPressionar) {
 
 ligarControle("btn-esquerda", "esquerda");
 ligarControle("btn-direita", "direita");
-// O botão de agachar foi removido da interface móvel.
+ligarControle("btn-agachar", "agachar");
 ligarControle("btn-pular", "pular", iniciarPulo);
 ligarControle("btn-biblia", "biblia", lancarBiblia);
 

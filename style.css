@@ -648,7 +648,7 @@ h2 {
 .objeto-nuvem-negra {
     width: 120px;
     height: 78px;
-    bottom: 190px;
+    bottom: 48px;
     overflow: hidden;
 }
 
@@ -664,7 +664,7 @@ h2 {
 @media (max-width: 650px) {
     .objeto-caixote { width: 40px; height: 40px; bottom: 0; }
     .objeto-nuvem, .objeto-nuvem-clara { width: 105px; height: 69px; bottom: 240px; }
-    .objeto-nuvem-negra { width: 84px; height: 55px; bottom: 125px; }
+    .objeto-nuvem-negra { width: 84px; height: 55px; bottom: 34px; }
 }
 
 /* Personagens de passagem e feras em movimento */
@@ -1058,4 +1058,21 @@ html, body {
     /* Par direito: Esquerda + Direita. */
     #btn-esquerda { right: 76px; left: auto; }
     #btn-direita { right: 10px; left: auto; }
+}
+
+
+/* Botão de agachamento restaurado */
+#btn-agachar {
+    min-width: 82px;
+    background: #245b80;
+}
+#btn-agachar:active {
+    background: #347eaa;
+}
+@media (max-width: 650px) {
+    #btn-agachar {
+        min-width: 72px;
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
 }
