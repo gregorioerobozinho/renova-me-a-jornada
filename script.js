@@ -103,12 +103,12 @@ const indicadorFase = $("#indicador-fase");
 const botaoPausar = $("#btn-pausar");
 const telaPausa = $("#tela-pausa");
 
-// Pontuação da fase: exibida separadamente das mensagens de vida.
+// Pontuação da fase: soma e subtrai pontos sem limite máximo.
 let pontuacao = 0;
 const painelPontuacao = document.createElement("div");
 painelPontuacao.id = "painel-pontuacao";
 painelPontuacao.setAttribute("aria-label", "Pontuação");
-painelPontuacao.textContent = "0";
+painelPontuacao.textContent = "Pontos: 0";
 cenario.appendChild(painelPontuacao);
 
 const resultadoFinal = document.createElement("div");
@@ -118,9 +118,9 @@ const painelFinal = $("#tela-final .painel") || $("#tela-final");
 if (painelFinal) painelFinal.appendChild(resultadoFinal);
 
 function atualizarPontuacao() {
-    painelPontuacao.textContent = String(pontuacao);
+    painelPontuacao.textContent = `Pontos: ${pontuacao}`;
     const campoFinal = resultadoFinal.querySelector(".pontuacao-final");
-    if (campoFinal) campoFinal.textContent = `Pontuação alcançada: ${pontuacao} pontos`;
+    if (campoFinal) campoFinal.textContent = `Pontuação total alcançada nesta fase: ${pontuacao} pontos`;
 }
 
 function adicionarPontos(valor) {
@@ -386,7 +386,7 @@ function criarFera() {
 
 function criarAmigo() {
     const modelo = SEQUENCIAS_AMIGOS[Math.floor(Math.random() * SEQUENCIAS_AMIGOS.length)];
-    // Amigos cruzam rapidamente a faixa superior, sem colisão com Robozinho.
+    // Amigos cruzam a faixa superior apenas como animação, sem colisão com Robozinho, a 50% da velocidade anterior.
     const direcao = Math.random() < 0.5 ? 1 : -1;
     const elemento = document.createElement("div");
     elemento.className = "ator-movel ator-amigo";
@@ -398,7 +398,7 @@ function criarAmigo() {
     const x = direcao > 0 ? -100 : cenario.clientWidth + 10;
     const ator = {
         elemento, imagem, modelo, x, direcao, quadro: 0, tempo: 0,
-        velocidade: Math.max(260, fisica.velocidadeCenario * 2.75), removido: false
+        velocidade: Math.max(130, fisica.velocidadeCenario * 1.375), removido: false
     };
     imagem.src = (direcao > 0 ? modelo.direita : modelo.esquerda)[0];
     if (modelo.nome === "Robozinha" && direcao < 0) imagem.style.transform = "scaleX(-1)";
@@ -466,7 +466,7 @@ function atualizarVidas(delta, motivo) {
     atualizarHUD();
 
     if (fisica.vidas < antes) {
-        adicionarPontos(-100);
+        adicionarPontos(-25);
         mensagemFase.textContent = motivo || "Você perdeu uma vida! Continue com cuidado.";
     } else if (fisica.vidas > antes) {
         mensagemFase.textContent = motivo || "Você conquistou uma vida!";
@@ -488,7 +488,7 @@ function verificarColisoesObjetos() {
         if (!tocou) continue;
 
         if (objeto.tipo === "nuvem-clara") {
-            adicionarPontos(30);
+            adicionarPontos(50);
             atualizarVidas(1, "Nuvem branca! Você conquistou uma vida.");
             removerObjeto(objeto);
         } else if (objeto.tipo === "caixote") {
@@ -612,7 +612,7 @@ function acertarObjetoComBiblia(biblia) {
         const atingiu = tiro.left <= alvo.right && tiro.right >= alvo.left &&
             tiro.top <= alvo.bottom && tiro.bottom >= alvo.top;
         if (atingiu) {
-            adicionarPontos(20);
+            adicionarPontos(25);
             removerObjeto(objeto);
         }
     }
@@ -625,7 +625,7 @@ function acertarObjetoComBiblia(biblia) {
         const atingiu = tiro.left <= alvo.right && tiro.right >= alvo.left &&
             tiro.top <= alvo.bottom && tiro.bottom >= alvo.top;
         if (atingiu) {
-            adicionarPontos(20);
+            adicionarPontos(25);
             fera.elemento.remove();
             fera.removido = true;
         }

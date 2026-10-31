@@ -1059,3 +1059,45 @@ html, body {
     #btn-esquerda { right: 76px; left: auto; }
     #btn-direita { right: 10px; left: auto; }
 }
+
+
+/* Mensagem de vida compacta e pontuação em caixa própria ao lado. */
+#mensagem-fase {
+    top: 12px;
+    left: 12px;
+    right: auto;
+    width: min(190px, 27%);
+    min-height: 34px;
+    padding: 4px 7px;
+    font-size: 0.68rem;
+    line-height: 1.2;
+}
+#painel-pontuacao {
+    top: 12px;
+    left: 210px;
+    right: auto;
+    width: 140px;
+    min-height: 34px;
+    padding: 4px 7px;
+    font-size: 0.95rem;
+}
+@media (max-width: 650px) {
+    #mensagem-fase {
+        top: 8px;
+        left: 8px;
+        right: auto;
+        width: calc(50% - 12px);
+        min-height: 34px;
+        padding: 4px 5px;
+        font-size: 0.62rem;
+    }
+    #painel-pontuacao {
+        top: 8px;
+        left: auto;
+        right: 8px;
+        width: calc(50% - 12px);
+        min-height: 34px;
+        padding: 4px 5px;
+        font-size: 0.88rem;
+    }
+}
