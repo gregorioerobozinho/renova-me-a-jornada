@@ -399,7 +399,7 @@ h2 {
 #personagens {
     position: absolute;
     right: 12%;
-    bottom: 85px;
+    bottom: 0;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -607,7 +607,7 @@ h2 {
 .objeto-caixote {
     width: 76px;
     height: 76px;
-    bottom: 68px;
+    bottom: 0;
     background: transparent;
 }
 
@@ -648,7 +648,7 @@ h2 {
 .objeto-nuvem-negra {
     width: 120px;
     height: 78px;
-    bottom: 68px;
+    bottom: 190px;
     overflow: hidden;
 }
 
@@ -662,9 +662,9 @@ h2 {
 }
 
 @media (max-width: 650px) {
-    .objeto-caixote { width: 40px; height: 40px; bottom: 112px; }
+    .objeto-caixote { width: 40px; height: 40px; bottom: 0; }
     .objeto-nuvem, .objeto-nuvem-clara { width: 105px; height: 69px; bottom: 240px; }
-    .objeto-nuvem-negra { width: 84px; height: 55px; bottom: 112px; }
+    .objeto-nuvem-negra { width: 84px; height: 55px; bottom: 125px; }
 }
 
 /* Personagens de passagem e feras em movimento */
@@ -688,14 +688,14 @@ h2 {
 
 .ator-fera {
     z-index: 3;
-    bottom: 68px;
+    bottom: 0;
     width: 184px;
     height: 208px;
 }
 
 .ator-amigo {
     z-index: 2;
-    bottom: 160px;
+    bottom: 75px;
     width: 78px;
     height: 92px;
     opacity: .98;
@@ -703,12 +703,12 @@ h2 {
 
 @media (max-width: 650px) {
     .ator-fera {
-        bottom: 112px;
+        bottom: 0;
         width: 132px;
         height: 152px;
     }
     .ator-amigo {
-        bottom: 180px;
+        bottom: 28px;
         width: 58px;
         height: 68px;
     }
@@ -770,15 +770,15 @@ html, body {
         font-size: .82rem;
     }
     #personagens {
-        bottom: 78px;
+        bottom: 0;
     }
     .ator-fera {
-        bottom: 54px;
+        bottom: 0;
         width: 116px;
         height: 132px;
     }
     .ator-amigo {
-        bottom: 112px;
+        bottom: 28px;
         width: 48px;
         height: 56px;
     }
@@ -1058,46 +1058,4 @@ html, body {
     /* Par direito: Esquerda + Direita. */
     #btn-esquerda { right: 76px; left: auto; }
     #btn-direita { right: 10px; left: auto; }
-}
-
-
-/* Mensagem de vida compacta e pontuação em caixa própria ao lado. */
-#mensagem-fase {
-    top: 12px;
-    left: 12px;
-    right: auto;
-    width: min(190px, 27%);
-    min-height: 34px;
-    padding: 4px 7px;
-    font-size: 0.68rem;
-    line-height: 1.2;
-}
-#painel-pontuacao {
-    top: 12px;
-    left: 210px;
-    right: auto;
-    width: 140px;
-    min-height: 34px;
-    padding: 4px 7px;
-    font-size: 0.95rem;
-}
-@media (max-width: 650px) {
-    #mensagem-fase {
-        top: 8px;
-        left: 8px;
-        right: auto;
-        width: calc(50% - 12px);
-        min-height: 34px;
-        padding: 4px 5px;
-        font-size: 0.62rem;
-    }
-    #painel-pontuacao {
-        top: 8px;
-        left: auto;
-        right: 8px;
-        width: calc(50% - 12px);
-        min-height: 34px;
-        padding: 4px 5px;
-        font-size: 0.88rem;
-    }
 }
