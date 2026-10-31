@@ -892,3 +892,98 @@ html, body {
     -webkit-tap-highlight-color: transparent;
 }
 #cenario img, #personagens img { -webkit-user-drag: none; user-drag: none; }
+
+
+/* Ajuste final: dois grupos compactos nos cantos inferiores em paisagem. */
+@media (max-width: 900px) and (orientation: landscape) {
+    #controles-jogo {
+        left: 0;
+        right: 0;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 8px;
+        padding: 0 clamp(10px, 2.2vw, 26px);
+    }
+    #btn-biblia,
+    #btn-pular {
+        flex: 0 0 auto;
+        margin: 0;
+    }
+    #btn-pular {
+        margin-right: auto;
+    }
+    #btn-esquerda,
+    #btn-direita {
+        flex: 0 0 auto;
+        margin: 0;
+    }
+    #controles-jogo button {
+        min-width: clamp(58px, 8vw, 88px);
+        min-height: 48px;
+        padding: 7px 10px;
+    }
+}
+
+/* Aviso de orientação horizontal quando o celular está em pé. */
+#aviso-gire-aparelho {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(8, 15, 22, .98);
+    color: #fff;
+    text-align: center;
+}
+#aviso-gire-aparelho[hidden] {
+    display: none !important;
+}
+.aviso-orientacao-cartao {
+    width: min(100%, 440px);
+    padding: 28px 22px;
+    border: 1px solid rgba(255,255,255,.22);
+    border-radius: 22px;
+    background: #192f46;
+    box-shadow: 0 12px 40px rgba(0,0,0,.4);
+}
+.aviso-orientacao-icone {
+    margin-bottom: 12px;
+    font-size: 3.5rem;
+    line-height: 1;
+}
+.aviso-orientacao-cartao strong {
+    display: block;
+    color: #f2d27a;
+    font-size: clamp(1.35rem, 4vw, 1.8rem);
+}
+.aviso-orientacao-cartao p {
+    margin: 14px 0;
+    font-size: clamp(1rem, 3vw, 1.2rem);
+}
+.aviso-orientacao-cartao span {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.12);
+    color: #dceaf5;
+    font-size: .9rem;
+}
+
+/* Impede o menu de toque/arraste sobre elementos visuais do jogo. */
+#tela-jogo img,
+#tela-jogo button,
+#tela-jogo {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+}
+#tela-jogo img {
+    -webkit-user-drag: none !important;
+    user-drag: none !important;
+    touch-action: none;
+}

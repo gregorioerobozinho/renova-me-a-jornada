@@ -195,7 +195,7 @@ const camadaObjetos = $("#objetos-cenario");
 const VIDA_MAXIMA = 7;
 const objetosCenario = [];
 let tempoProximoObjeto = 3;
-let tempoProximaNuvemClara = 5;
+let tempoProximaNuvemClara = 8;
 let tempoTotalObjetos = 0;
 let sequenciaObjetos = 0;
 let tempoProximoAmigo = 10;
@@ -223,7 +223,7 @@ function limparObjetos() {
     objetosCenario.forEach((obj) => obj.elemento.remove());
     objetosCenario.length = 0;
     tempoProximoObjeto = 3;
-    tempoProximaNuvemClara = 5;
+    tempoProximaNuvemClara = 8;
     tempoTotalObjetos = 0;
     sequenciaObjetos = 0;
     tempoProximoAmigo = 10;
@@ -516,7 +516,7 @@ function atualizarObjetos(dt) {
     }
     if (tempoProximaNuvemClara <= 0) {
         if (!emEstradaCelestial) criarObjetoCenario();
-        tempoProximaNuvemClara = 5;
+        tempoProximaNuvemClara = 8;
     }
     if (tempoProximoAmigo <= 0) {
         criarAmigo();
@@ -769,41 +769,79 @@ ligarControle("btn-direita", "direita");
 ligarControle("btn-pular", "pular", iniciarPulo);
 ligarControle("btn-biblia", "biblia", lancarBiblia);
 
-// Em celulares, prioriza a orientação horizontal. Alguns navegadores só
-// permitem travar a orientação após uma ação explícita do jogador.
-let avisoOrientacaoCriado = false;
+// Em celulares, prioriza a orientação horizontal. O bloqueio é tentado
+// após um gesto do jogador; quando o navegador não permite, o aviso permanece.
+function ehDispositivoMovel() {
+    return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+        window.matchMedia("(pointer: coarse)").matches;
+}
+
 async function solicitarTelaHorizontal() {
-    if (!/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return;
+    if (!ehDispositivoMovel()) return;
+
+    try {
+        // Alguns navegadores só aceitam orientation.lock em tela cheia.
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+            await document.documentElement.requestFullscreen();
+        }
+    } catch (_) {
+        // Tela cheia pode ser bloqueada; ainda tentaremos a orientação.
+    }
+
     try {
         if (screen.orientation && screen.orientation.lock) {
             await screen.orientation.lock("landscape");
         }
     } catch (_) {
-        // O navegador pode não permitir bloqueio; nesse caso mostramos orientação.
+        // O navegador pode não permitir bloqueio; o aviso orienta o jogador.
     }
     atualizarAvisoOrientacao();
 }
 
 function atualizarAvisoOrientacao() {
-    if (!/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)) return;
+    if (!ehDispositivoMovel()) return;
+
     let aviso = document.getElementById("aviso-gire-aparelho");
     if (!aviso) {
         aviso = document.createElement("div");
         aviso.id = "aviso-gire-aparelho";
         aviso.setAttribute("role", "status");
-        aviso.textContent = "Para jogar, vire o celular na horizontal.";
+        aviso.innerHTML = `
+            <div class="aviso-orientacao-cartao">
+                <div class="aviso-orientacao-icone" aria-hidden="true">↻</div>
+                <strong>Vire seu celular!</strong>
+                <p>Para jogar Renova-me: A Jornada, coloque o aparelho na posição horizontal.</p>
+                <span>Aguardando orientação horizontal</span>
+            </div>`;
         document.body.appendChild(aviso);
     }
-    aviso.hidden = window.matchMedia("(orientation: landscape)").matches;
+    const estaNaHorizontal = window.matchMedia("(orientation: landscape)").matches;
+    aviso.hidden = estaNaHorizontal;
 }
 
 window.addEventListener("orientationchange", atualizarAvisoOrientacao);
 window.addEventListener("resize", atualizarAvisoOrientacao);
 document.addEventListener("DOMContentLoaded", atualizarAvisoOrientacao);
 
-// Solicita a orientação quando o jogador inicia/interage com o jogo.
-document.getElementById("btn-jogar")?.addEventListener("click", solicitarTelaHorizontal, { once: true });
-document.getElementById("btn-pular")?.addEventListener("pointerdown", solicitarTelaHorizontal, { once: true });
+// A solicitação ocorre no primeiro gesto de navegação/início, quando há
+// permissão do navegador para tela cheia e bloqueio de orientação.
+document.getElementById("btn-jogar")?.addEventListener("click", solicitarTelaHorizontal);
+document.getElementById("btn-continuar")?.addEventListener("click", solicitarTelaHorizontal);
+document.getElementById("btn-pular")?.addEventListener("pointerdown", solicitarTelaHorizontal);
+
+// Evita menus de toque, arraste e seleção de imagens durante a partida.
+document.addEventListener("contextmenu", (evento) => {
+    if (evento.target.closest("#controles-jogo, #cenario, #personagens, #tela-jogo")) {
+        evento.preventDefault();
+    }
+});
+document.addEventListener("dragstart", (evento) => {
+    if (evento.target.closest("#controles-jogo, #cenario, #personagens, #tela-jogo") ||
+        evento.target.tagName === "IMG") evento.preventDefault();
+});
+document.addEventListener("selectstart", (evento) => {
+    if (evento.target.closest("#tela-jogo")) evento.preventDefault();
+});
 
 // Evita menu de contexto, arraste/baixar imagem e seleção durante a partida.
 document.addEventListener("contextmenu", (evento) => {
