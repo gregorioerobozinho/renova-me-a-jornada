@@ -688,14 +688,14 @@ h2 {
 
 .ator-fera {
     z-index: 3;
-    bottom: 68px;
+    bottom: 138px;
     width: 184px;
     height: 208px;
 }
 
 .ator-amigo {
     z-index: 2;
-    bottom: 160px;
+    bottom: 230px;
     width: 78px;
     height: 92px;
     opacity: .98;
@@ -703,12 +703,12 @@ h2 {
 
 @media (max-width: 650px) {
     .ator-fera {
-        bottom: 112px;
+        bottom: 182px;
         width: 132px;
         height: 152px;
     }
     .ator-amigo {
-        bottom: 180px;
+        bottom: 250px;
         width: 58px;
         height: 68px;
     }

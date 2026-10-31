@@ -374,7 +374,7 @@ function criarFera() {
         if (modelo.nome === "Capivara" && !ator.quadroFalha) {
             ator.quadroFalha = true;
             imagem.onerror = null;
-            imagem.src = "Capivara2.png";
+            imagem.src = "Capivara.png";
             imagem.alt = "";
         } else {
             imagem.style.display = "none";
