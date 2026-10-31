@@ -195,7 +195,8 @@ const camadaObjetos = $("#objetos-cenario");
 const VIDA_MAXIMA = 7;
 const objetosCenario = [];
 let tempoProximoObjeto = 3;
-let tempoProximaNuvemClara = 8;
+let tempoProximaFera = 5;
+let tempoProximaNuvemClara = 12;
 let tempoTotalObjetos = 0;
 let sequenciaObjetos = 0;
 let tempoProximoAmigo = 10;
@@ -223,7 +224,8 @@ function limparObjetos() {
     objetosCenario.forEach((obj) => obj.elemento.remove());
     objetosCenario.length = 0;
     tempoProximoObjeto = 3;
-    tempoProximaNuvemClara = 8;
+    tempoProximaFera = 5;
+    tempoProximaNuvemClara = 12;
     tempoTotalObjetos = 0;
     sequenciaObjetos = 0;
     tempoProximoAmigo = 10;
@@ -503,20 +505,39 @@ function atualizarTrechoCelestial(dt) {
 function atualizarObjetos(dt) {
     tempoTotalObjetos += dt;
     tempoProximoObjeto -= dt;
+    tempoProximaFera -= dt;
     tempoProximaNuvemClara -= dt;
     tempoProximoAmigo -= dt;
 
-    // A cada três segundos, tenta criar no máximo um item de cada categoria.
-    // Se ainda houver um ativo daquela categoria, aguarda o próximo ciclo.
+    // Caixotes e nuvens negras mantêm seu próprio ciclo de três segundos.
     if (tempoProximoObjeto <= 0) {
         if (!objetosCenario.some((item) => !item.removido && item.tipo === "caixote")) criarCaixote();
         if (!objetosCenario.some((item) => !item.removido && item.tipo === "nuvem-negra")) criarNuvemNegra();
-        if (ferasAtivas.length === 0) criarFera();
         tempoProximoObjeto = 3;
     }
+
+    // Feras aparecem separadamente, com intervalo de cinco segundos.
+    // Não cria outra enquanto a anterior ainda estiver atravessando a tela.
+    if (tempoProximaFera <= 0) {
+        if (ferasAtivas.length === 0) {
+            criarFera();
+            tempoProximaFera = 5;
+        } else {
+            tempoProximaFera = 1;
+        }
+    }
+
+    // Uma nuvem branca por vez e intervalo maior entre coletas.
     if (tempoProximaNuvemClara <= 0) {
-        if (!emEstradaCelestial) criarObjetoCenario();
-        tempoProximaNuvemClara = 8;
+        const nuvemClaraAtiva = objetosCenario.some(
+            (item) => !item.removido && item.tipo === "nuvem-clara"
+        );
+        if (!emEstradaCelestial && !nuvemClaraAtiva) {
+            criarObjetoCenario();
+            tempoProximaNuvemClara = 12;
+        } else {
+            tempoProximaNuvemClara = 12;
+        }
     }
     if (tempoProximoAmigo <= 0) {
         criarAmigo();

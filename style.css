@@ -987,3 +987,34 @@ html, body {
     user-drag: none !important;
     touch-action: none;
 }
+
+
+/* Correção solicitada: controles em dois pares compactos, nos cantos da tela. */
+@media (max-width: 900px) and (orientation: landscape) {
+    #controles-jogo {
+        position: absolute;
+        inset: auto 0 max(8px, env(safe-area-inset-bottom)) 0;
+        display: block;
+        height: 54px;
+        padding: 0;
+        margin: 0;
+        pointer-events: none;
+    }
+    #controles-jogo button {
+        position: absolute;
+        top: 0;
+        min-width: 58px;
+        width: clamp(58px, 7.2vw, 76px);
+        min-height: 48px;
+        height: 48px;
+        margin: 0 !important;
+        padding: 5px 7px;
+        pointer-events: auto;
+    }
+    /* Par esquerdo: Bíblia + Pular. */
+    #btn-biblia { left: 10px; right: auto; }
+    #btn-pular { left: 76px; right: auto; }
+    /* Par direito: Esquerda + Direita. */
+    #btn-esquerda { right: 76px; left: auto; }
+    #btn-direita { right: 10px; left: auto; }
+}
