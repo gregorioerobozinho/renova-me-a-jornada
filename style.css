@@ -399,7 +399,7 @@ h2 {
 #personagens {
     position: absolute;
     right: 12%;
-    bottom: 85px;
+    bottom: 68px;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -688,7 +688,7 @@ h2 {
 
 .ator-fera {
     z-index: 3;
-    bottom: 138px;
+    bottom: 208px;
     width: 184px;
     height: 208px;
 }
@@ -703,7 +703,7 @@ h2 {
 
 @media (max-width: 650px) {
     .ator-fera {
-        bottom: 182px;
+        bottom: 252px;
         width: 132px;
         height: 152px;
     }
