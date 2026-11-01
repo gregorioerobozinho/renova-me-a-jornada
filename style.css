@@ -1063,7 +1063,7 @@ html, body {
 /* Ajuste de estrada exclusivo das fases 3 e 5.
    Nas demais fases, os posicionamentos originais são preservados. */
 #cenario.fase-ajuste-estrada #personagens {
-    bottom: 12px;
+    bottom: 24px;
 }
 #cenario.fase-ajuste-estrada .objeto-caixote,
 #cenario.fase-ajuste-estrada .ator-fera {
@@ -1076,7 +1076,9 @@ html, body {
     bottom: 75px;
 }
 @media (max-width: 650px) {
-    #cenario.fase-ajuste-estrada #personagens,
+    #cenario.fase-ajuste-estrada #personagens {
+        bottom: 24px;
+    }
     #cenario.fase-ajuste-estrada .objeto-caixote,
     #cenario.fase-ajuste-estrada .ator-fera {
         bottom: 12px;
@@ -1113,14 +1115,14 @@ html, body {
 /* Ajuste fino final: personagem principal e personagens de passagem.
    Aplicado somente às fases diferentes de 3 e 5. */
 #cenario:not(.fase-ajuste-estrada) #personagens {
-    bottom: 60px !important;
+    bottom: 84px !important;
 }
 #cenario:not(.fase-ajuste-estrada) .ator-amigo {
     bottom: 85px !important;
 }
 @media (max-width: 650px) {
     #cenario:not(.fase-ajuste-estrada) #personagens {
-        bottom: 60px !important;
+        bottom: 84px !important;
     }
     #cenario:not(.fase-ajuste-estrada) .ator-amigo {
         bottom: 85px !important;
