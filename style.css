@@ -297,29 +297,10 @@ h2 {
     overflow: hidden;
     border: 1px solid var(--cor-borda);
     border-radius: var(--raio);
-
     background-color: #7bb5d8;
-    }
-
-#faixa-cenario {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    width: max-content;
-    z-index: 0;
-    pointer-events: none;
-    will-change: transform;
-}
-
-#faixa-cenario img {
-    display: block;
-    width: auto;
-    height: 100%;
-    max-width: none;
-    flex: 0 0 auto;
-    object-fit: fill;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: cover;
 }
 
 #mensagem-fase,
@@ -398,7 +379,8 @@ h2 {
 
 #personagens {
     position: absolute;
-    right: 12%;
+    left: 30%;
+    right: auto;
     bottom: 0px;
     display: flex;
     align-items: flex-end;
@@ -1142,5 +1124,53 @@ html, body {
     }
     #cenario:not(.fase-ajuste-estrada) .ator-amigo {
         bottom: 85px !important;
+    }
+}
+
+
+/* Meta de pontuação e cronômetro regressivo da partida */
+#indicador-tempo {
+    min-width: 68px;
+    color: #ffffff;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+#aviso-meta {
+    position: absolute;
+    top: 66px;
+    left: 50%;
+    z-index: 4;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100% - 24px);
+    padding: 6px 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.88);
+    color: #0757c7;
+    font-size: clamp(0.72rem, 1.8vw, 1rem);
+    font-weight: 900;
+    line-height: 1.2;
+    text-align: center;
+    pointer-events: none;
+}
+
+#resultado-final .tempo-final {
+    margin: 8px 0 0;
+    color: var(--cor-destaque);
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+@media (max-width: 650px) {
+    #aviso-meta {
+        top: 54px;
+        padding: 5px 9px;
+        font-size: 0.72rem;
+    }
+    #indicador-tempo {
+        min-width: 54px;
+        font-size: 0.9rem;
     }
 }

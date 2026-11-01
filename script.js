@@ -60,40 +60,15 @@ const cenario = $("#cenario");
 const personagem = $("#personagem-robozinho");
 const personagens = $("#personagens");
 
-const faixaCenario = document.createElement("div");
-faixaCenario.id = "faixa-cenario";
-const imagensFaixa = [];
-
-// Cada fase é formada por quatro partes em sequência. A faixa contém
-// duas cópias da sequência para permitir a repetição contínua do cenário.
+// Cada fase usa uma única imagem fixa como cenário de fundo.
 function carregarCenario(fase) {
-    faixaCenario.replaceChildren();
-    imagensFaixa.length = 0;
-
-    const sufixos = fase === 1 ? ["", "a", "b", "c"] : ["", "a", "b", "c"];
-    const nomes = sufixos.map((sufixo) => `Fase${fase}${sufixo}.png`);
-
-    for (let volta = 0; volta < 2; volta++) {
-        nomes.forEach((nome) => {
-            const imagem = document.createElement("img");
-            imagem.src = nome;
-            imagem.alt = "";
-            imagem.draggable = false;
-            imagem.onerror = () => {
-                console.error(`Não foi possível carregar a imagem do cenário: ${nome}`);
-                imagem.dataset.erro = "true";
-            };
-            imagensFaixa.push(imagem);
-            faixaCenario.appendChild(imagem);
-        });
-    }
-
-    if (!faixaCenario.isConnected) {
-        cenario.insertBefore(faixaCenario, cenario.firstChild);
-    }
+    const imagem = `Fase${fase}.png`;
+    cenario.style.backgroundImage = `url("${imagem}")`;
+    cenario.style.backgroundRepeat = "no-repeat";
+    cenario.style.backgroundPosition = "center bottom";
+    cenario.style.backgroundSize = "cover";
 }
 
-cenario.insertBefore(faixaCenario, cenario.firstChild);
 carregarCenario(1);
 
 const mensagemFase = $("#mensagem-fase");
@@ -111,6 +86,28 @@ painelPontuacao.setAttribute("aria-label", "Pontuação");
 painelPontuacao.textContent = "Pontos: 0";
 cenario.appendChild(painelPontuacao);
 
+const avisoMeta = document.createElement("div");
+avisoMeta.id = "aviso-meta";
+avisoMeta.textContent = "O jogo termina quando alcançar 10.000 pontos";
+cenario.appendChild(avisoMeta);
+
+const indicadorTempo = document.querySelector("#indicador-tempo");
+const TEMPO_LIMITE_SEGUNDOS = 7 * 60;
+const PONTUACAO_VITORIA = 10000;
+let tempoRestante = TEMPO_LIMITE_SEGUNDOS;
+let partidaEncerrada = false;
+
+function formatarTempo(segundos) {
+    const total = Math.max(0, Math.ceil(segundos));
+    const minutos = Math.floor(total / 60);
+    const restante = total % 60;
+    return `${String(minutos).padStart(2, "0")}:${String(restante).padStart(2, "0")}`;
+}
+
+function atualizarCronometro() {
+    if (indicadorTempo) indicadorTempo.textContent = formatarTempo(tempoRestante);
+}
+
 const resultadoFinal = document.createElement("div");
 resultadoFinal.id = "resultado-final";
 resultadoFinal.innerHTML = '<h2>Parabéns!</h2><p>Você concluiu esta jornada!</p><p class="pontuacao-final"></p>';
@@ -123,9 +120,38 @@ function atualizarPontuacao() {
     if (campoFinal) campoFinal.textContent = `Pontuação total alcançada nesta fase: ${pontuacao} pontos`;
 }
 
+function finalizarPartida(venceu) {
+    if (partidaEncerrada) return;
+    partidaEncerrada = true;
+
+    const tempoDecorrido = TEMPO_LIMITE_SEGUNDOS - tempoRestante;
+    const titulo = $("#titulo-final");
+    if (titulo) titulo.textContent = venceu ? "Você venceu!" : "Fim de jogo";
+
+    resultadoFinal.innerHTML = `
+        <h2>${venceu ? "Parabéns! Meta alcançada!" : "Tempo esgotado!"}</h2>
+        <p>${venceu
+            ? "Você alcançou os 10.000 pontos dentro do tempo."
+            : "Você não alcançou os 10.000 pontos em 7 minutos. Tente novamente!"}</p>
+        <p class="pontuacao-final">Pontuação final: ${pontuacao.toLocaleString("pt-BR")} pontos</p>
+        <p class="tempo-final">Tempo utilizado: ${formatarTempo(tempoDecorrido)}</p>
+    `;
+
+    pararFase();
+    jogoPausado = false;
+    if (telaPausa) telaPausa.hidden = true;
+    if (botaoPausar) {
+        botaoPausar.textContent = "Pausar";
+        botaoPausar.setAttribute("aria-pressed", "false");
+    }
+    mostrarTela("tela-final");
+}
+
 function adicionarPontos(valor) {
+    if (partidaEncerrada) return;
     pontuacao += valor;
     atualizarPontuacao();
+    if (pontuacao >= PONTUACAO_VITORIA) finalizarPartida(true);
 }
 
 function pausarJogo() {
@@ -219,9 +245,10 @@ let deslocamentoAcumulado = 0;
 const camadaObjetos = $("#objetos-cenario");
 const VIDA_MAXIMA = 7;
 const objetosCenario = [];
-let tempoProximoObjeto = 3;
-let tempoProximaFera = 5;
-let tempoProximaNuvemClara = 12;
+let tempoProximaCaixa = 5;
+let tempoProximaNuvemNegra = 6;
+let tempoProximaFera = 7;
+let tempoProximaNuvemClara = 10;
 let tempoTotalObjetos = 0;
 let sequenciaObjetos = 0;
 let tempoProximoAmigo = 10;
@@ -248,9 +275,10 @@ const SEQUENCIAS_AMIGOS = [
 function limparObjetos() {
     objetosCenario.forEach((obj) => obj.elemento.remove());
     objetosCenario.length = 0;
-    tempoProximoObjeto = 3;
-    tempoProximaFera = 5;
-    tempoProximaNuvemClara = 12;
+    tempoProximaCaixa = 5;
+    tempoProximaNuvemNegra = 6;
+    tempoProximaFera = 7;
+    tempoProximaNuvemClara = 10;
     tempoTotalObjetos = 0;
     sequenciaObjetos = 0;
     tempoProximoAmigo = 10;
@@ -282,7 +310,14 @@ function criarObjetoCenario() {
     const alturaAlvo = Math.max(alturaPersonagem * 2, alturaCena * 0.62);
     elemento.style.bottom = `${Math.min(alturaAlvo, alturaCena - alturaNuvem - 12)}px`;
     camadaObjetos.appendChild(elemento);
-    objetosCenario.push({ elemento, tipo: "nuvem-clara", x: cenario.clientWidth + 30, removido: false });
+    objetosCenario.push({
+        elemento,
+        tipo: "nuvem-clara",
+        x: cenario.clientWidth + 30,
+        direcao: -1,
+        velocidade: 130,
+        removido: false
+    });
 }
 
 function criarCaixote() {
@@ -535,62 +570,57 @@ function atualizarTrechoCelestial() {
 
 function atualizarObjetos(dt) {
     tempoTotalObjetos += dt;
-    tempoProximoObjeto -= dt;
+    tempoProximaCaixa -= dt;
+    tempoProximaNuvemNegra -= dt;
     tempoProximaFera -= dt;
     tempoProximaNuvemClara -= dt;
-    tempoProximoAmigo -= dt;
 
-    // Caixotes e nuvens negras mantêm seu próprio ciclo de três segundos.
-    if (tempoProximoObjeto <= 0) {
-        if (!objetosCenario.some((item) => !item.removido && item.tipo === "caixote")) criarCaixote();
-        if (!objetosCenario.some((item) => !item.removido && item.tipo === "nuvem-negra")) criarNuvemNegra();
-        tempoProximoObjeto = 3;
+    // Entradas escalonadas: caixa aos 5s, nuvem escura aos 6s,
+    // fera aos 7s. Cada categoria repete em intervalos de 5 segundos.
+    // Se ainda houver um exemplar daquela categoria na tela, a próxima
+    // entrada aguarda sua saída/remoção, evitando empilhar exemplares iguais.
+    const caixaAtiva = objetosCenario.some(
+        (item) => !item.removido && item.tipo === "caixote"
+    );
+    if (tempoProximaCaixa <= 0 && !caixaAtiva) {
+        criarCaixote();
+        tempoProximaCaixa = 5;
     }
 
-    // A frequência das feras aumenta progressivamente por fase.
-    // Fases 1-4: normal (5 s); fases 5-8: dobro (2,5 s);
-    // fases 9-10: triplo (aprox. 1,67 s). A velocidade de cada fera
-    // permanece inalterada; só muda o intervalo entre aparições.
-    const intervaloFera = fisica.fase >= 9 ? (5 / 3) : (fisica.fase >= 5 ? 2.5 : 5);
-    if (tempoProximaFera <= 0) {
-        if (ferasAtivas.length === 0) {
-            criarFera();
-            tempoProximaFera = intervaloFera;
-        } else {
-            // Aguarda a fera atual sair ou ser atingida antes de criar outra.
-            tempoProximaFera = 0.25;
-        }
+    const nuvemNegraAtiva = objetosCenario.some(
+        (item) => !item.removido && item.tipo === "nuvem-negra"
+    );
+    if (tempoProximaNuvemNegra <= 0 && !nuvemNegraAtiva) {
+        criarNuvemNegra();
+        tempoProximaNuvemNegra = 5;
     }
 
-    // Uma nuvem branca por vez e intervalo maior entre coletas.
+    if (tempoProximaFera <= 0 && ferasAtivas.length === 0) {
+        criarFera();
+        tempoProximaFera = 5;
+    }
+
+    // Uma nuvem branca atravessa a cena a cada 10 segundos.
     if (tempoProximaNuvemClara <= 0) {
-        const nuvemClaraAtiva = objetosCenario.some(
-            (item) => !item.removido && item.tipo === "nuvem-clara"
-        );
-        if (!emEstradaCelestial && !nuvemClaraAtiva) {
-            criarObjetoCenario();
-            tempoProximaNuvemClara = 12;
-        } else {
-            tempoProximaNuvemClara = 12;
-        }
-    }
-    if (tempoProximoAmigo <= 0) {
-        criarAmigo();
-        tempoProximoAmigo = 10;
+        criarObjetoCenario();
+        tempoProximaNuvemClara = 10;
     }
 
     for (const objeto of objetosCenario) {
         if (objeto.removido) continue;
         if (objeto.tipo === "nuvem-negra") {
+            // Movimento independente do avanço/recuo de Robozinho.
             objeto.x += objeto.direcao * objeto.velocidade * dt;
             if ((objeto.direcao > 0 && objeto.x > cenario.clientWidth + 140) ||
                 (objeto.direcao < 0 && objeto.x < -150)) removerObjeto(objeto);
         } else if (objeto.tipo === "caixote") {
+            // Movimento independente do avanço/recuo de Robozinho.
             objeto.x += (objeto.direcao > 0 ? -1 : 1) * objeto.velocidade * dt;
             if ((objeto.direcao > 0 && objeto.x < -160) ||
                 (objeto.direcao < 0 && objeto.x > cenario.clientWidth + 100)) removerObjeto(objeto);
-        } else {
-            objeto.x -= (fisica.deltaAvanco || 0);
+        } else if (objeto.tipo === "nuvem-clara") {
+            // Também se desloca pela própria velocidade, sem depender de Robozinho.
+            objeto.x += objeto.direcao * objeto.velocidade * dt;
             if (objeto.x < -160) removerObjeto(objeto);
         }
         objeto.elemento.style.left = `${objeto.x}px`;
@@ -605,35 +635,49 @@ function atualizarObjetos(dt) {
 }
 
 function acertarObjetoComBiblia(biblia) {
-    if (!biblia || !biblia.isConnected) return;
+    if (!biblia || !biblia.isConnected) return false;
 
     const tiro = biblia.getBoundingClientRect();
+    const centroTiroX = (tiro.left + tiro.right) / 2;
+    const centroTiroY = (tiro.top + tiro.bottom) / 2;
+    const alvos = [];
 
-    // A Bíblia pode destruir qualquer caixa ou nuvem negra que tocar.
+    // Reúne caixas, nuvens escuras e feras em uma única lista.
+    // Se houver sobreposição, escolhe apenas o alvo mais próximo do centro do tiro.
     for (const objeto of objetosCenario) {
         if (objeto.removido || !["caixote", "nuvem-negra"].includes(objeto.tipo)) continue;
         const alvo = objeto.elemento.getBoundingClientRect();
         const atingiu = tiro.left <= alvo.right && tiro.right >= alvo.left &&
             tiro.top <= alvo.bottom && tiro.bottom >= alvo.top;
         if (atingiu) {
-            adicionarPontos(25);
-            removerObjeto(objeto);
+            const dx = (alvo.left + alvo.right) / 2 - centroTiroX;
+            const dy = (alvo.top + alvo.bottom) / 2 - centroTiroY;
+            alvos.push({ tipo: "objeto", referencia: objeto, distancia: dx * dx + dy * dy });
         }
     }
-
-    // Percorre todas as feras, sem depender do nome ou da ordem da lista.
-    // Isso inclui expressamente a Capivara.
     for (const fera of ferasAtivas) {
         if (fera.removido) continue;
         const alvo = fera.elemento.getBoundingClientRect();
         const atingiu = tiro.left <= alvo.right && tiro.right >= alvo.left &&
             tiro.top <= alvo.bottom && tiro.bottom >= alvo.top;
         if (atingiu) {
-            adicionarPontos(25);
-            fera.elemento.remove();
-            fera.removido = true;
+            const dx = (alvo.left + alvo.right) / 2 - centroTiroX;
+            const dy = (alvo.top + alvo.bottom) / 2 - centroTiroY;
+            alvos.push({ tipo: "fera", referencia: fera, distancia: dx * dx + dy * dy });
         }
     }
+
+    if (alvos.length === 0) return false;
+    alvos.sort((a, b) => a.distancia - b.distancia);
+    const escolhido = alvos[0];
+    if (escolhido.tipo === "objeto") {
+        removerObjeto(escolhido.referencia);
+    } else {
+        escolhido.referencia.elemento.remove();
+        escolhido.referencia.removido = true;
+    }
+    adicionarPontos(25);
+    return true;
 }
 
 // ---------- Preparação da fase ----------
@@ -655,7 +699,7 @@ function prepararFase(fase = fisica.fase) {
     teclas.clear();
 
     fisica.velocidadeX = 0;
-    fisica.posicaoX = Math.max(40, cenario.clientWidth * 0.30);
+    fisica.posicaoX = Math.max(10, Math.min(cenario.clientWidth * 0.30, cenario.clientWidth - (personagens.offsetWidth || 100) - 10));
     fisica.velocidadeY = 0;
     fisica.alturaPulo = 0;
     fisica.noChao = true;
@@ -663,6 +707,11 @@ function prepararFase(fase = fisica.fase) {
     fisica.bibliaAtiva = false;
     fisica.faseIniciada = false;
     fisica.tempoFase = 0;
+    tempoRestante = TEMPO_LIMITE_SEGUNDOS;
+    partidaEncerrada = false;
+    atualizarCronometro();
+    const tituloFinal = $("#titulo-final");
+    if (tituloFinal) tituloFinal.textContent = "Até aqui o Senhor nos guiou!";
     fisica.posicaoCenario = 0;
     deslocamentoAcumulado = 0;
     fisica.deltaAvanco = 0;
@@ -1007,7 +1056,12 @@ function lancarBiblia() {
         x += velocidade * dt;
         biblia.style.left = `${x}px`;
 
-        acertarObjetoComBiblia(biblia);
+        const acertouAlvo = acertarObjetoComBiblia(biblia);
+        if (acertouAlvo) {
+            biblia.remove();
+            bibliasAtivas.delete(biblia);
+            return;
+        }
 
         if ((direcao > 0 && x > cenario.clientWidth + 50) ||
             (direcao < 0 && x < -larguraBiblia - 50)) {
@@ -1059,41 +1113,14 @@ function atualizarMovimento(dt) {
         Math.min(fisica.velocidadeMaxima, fisica.velocidadeX)
     );
 
-    // Teste de progressão: Robozinho avança pela tela; ao alcançar a metade,
-    // o mundo começa a rolar. O cenário nunca retrocede quando ele volta.
-    fisica.deltaAvanco = 0;
+    // O cenário permanece imóvel; Robozinho se desloca dentro dos limites.
     fisica.posicaoX += fisica.velocidadeX * dt;
     const limiteEsquerdo = 10;
-    const limiteDireito = Math.max(limiteEsquerdo, cenario.clientWidth * 0.5 - personagem.clientWidth / 2);
-    if (fisica.posicaoX > limiteDireito) {
-        const excesso = fisica.posicaoX - limiteDireito;
-        fisica.posicaoX = limiteDireito;
-        deslocamentoAcumulado += excesso;
-        fisica.deltaAvanco = excesso;
-        fisica.posicaoCenario = deslocamentoAcumulado;
-    }
-    fisica.posicaoX = Math.max(limiteEsquerdo, fisica.posicaoX);
-
-    // Calcula a largura de cada imagem na altura atual do cenário.
-    const altura = cenario.clientHeight;
-
-    
-const imagensDaSequencia = imagensFaixa.slice(0, 4);
-const imagensProntas = imagensDaSequencia.length === 4 &&
-    imagensDaSequencia.every((imagem) => imagem.complete && imagem.naturalWidth > 0);
-
-if (imagensProntas) {
-    const altura = cenario.clientHeight;
-    const larguraVolta = imagensDaSequencia.reduce((soma, imagem) =>
-        soma + imagem.naturalWidth * altura / imagem.naturalHeight, 0);
-
-    if (larguraVolta > 0) {
-        // O deslocamento reinicia exatamente no começo da segunda cópia.
-        const deslocamento = fisica.posicaoCenario % larguraVolta;
-        faixaCenario.style.transform = `translate3d(${-deslocamento}px, 0, 0)`;
-    }
-}
-
+    const larguraPersonagem = personagens.offsetWidth || personagem.offsetWidth || 100;
+    const limiteDireito = Math.max(limiteEsquerdo, cenario.clientWidth - larguraPersonagem - 10);
+    fisica.posicaoX = Math.max(limiteEsquerdo, Math.min(limiteDireito, fisica.posicaoX));
+    fisica.deltaAvanco = 0;
+    fisica.posicaoCenario = 0;
 
     personagens.style.left = `${fisica.posicaoX}px`;
 
@@ -1180,17 +1207,17 @@ function loopJogo(agora) {
 
     if (fisica.faseIniciada) {
         fisica.tempoFase += dt;
+        tempoRestante = Math.max(0, tempoRestante - dt);
+        atualizarCronometro();
 
         atualizarMovimento(dt);
-        atualizarTrechoCelestial(dt);
-        atualizarPulo(dt);
+            atualizarPulo(dt);
         atualizarObjetos(dt);
 
-        // Mantém a duração já definida: dois minutos e trinta segundos.
-        if (fisica.tempoFase >= 300) {
-            pararFase();
-            atualizarPontuacao();
-            mostrarTela("tela-final");
+        if (partidaEncerrada) return;
+
+        if (tempoRestante <= 0) {
+            finalizarPartida(false);
             return;
         }
     }
@@ -1200,4 +1227,5 @@ function loopJogo(agora) {
 
 // ---------- Inicialização ----------
 
+atualizarCronometro();
 mostrarTela("tela-inicial");
