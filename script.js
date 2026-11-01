@@ -915,19 +915,40 @@ window.addEventListener("blur", () => {
 
 // ---------- Controles de celular ----------
 
+function liberarPonteiro(evento) {
+    const comandoLiberado = ponteirosAtivos.get(evento.pointerId);
+    if (!comandoLiberado) return;
+
+    ponteirosAtivos.delete(evento.pointerId);
+
+    // Mantém o comando ativo se outro dedo ainda estiver segurando o mesmo botão.
+    const aindaPressionado = [...ponteirosAtivos.values()].includes(comandoLiberado);
+    if (!aindaPressionado) {
+        teclas.delete(comandoLiberado);
+        if (comandoLiberado === "pular") tempoPulo = 0;
+    }
+}
+
 function ligarControle(id, comando, aoPressionar) {
     const botao = document.getElementById(id);
     if (!botao) return;
 
     botao.style.touchAction = "none";
-
     botao.addEventListener("pointerdown", (evento) => {
+        if (evento.pointerType === "mouse" && evento.button !== 0) return;
         evento.preventDefault();
-        // Map por ponteiro permite pressionar, por exemplo, direita + pulo + Bíblia
-        // simultaneamente em telas sensíveis ao toque.
+
+        // Cada dedo recebe seu próprio registro: permite combinar direção,
+        // pulo e Bíblia sem que um toque interrompa o outro.
         if (ponteirosAtivos.has(evento.pointerId)) return;
         ponteirosAtivos.set(evento.pointerId, comando);
-        try { botao.setPointerCapture(evento.pointerId); } catch (_) {}
+
+        try {
+            botao.setPointerCapture(evento.pointerId);
+        } catch (_) {
+            // Os eventos globais abaixo continuam garantindo a liberação.
+        }
+
         teclas.add(comando);
 
         if (!fisica.faseIniciada) {
@@ -936,22 +957,29 @@ function ligarControle(id, comando, aoPressionar) {
             mensagemFase.textContent = "";
         }
         if (aoPressionar) aoPressionar();
-    });
+    }, { passive: false });
 
-    function soltar(evento) {
-        const comandoLiberado = ponteirosAtivos.get(evento.pointerId);
-        if (!comandoLiberado) return;
-        ponteirosAtivos.delete(evento.pointerId);
-        // Só libera o comando quando nenhum outro dedo ainda o mantém pressionado.
-        if (![...ponteirosAtivos.values()].includes(comandoLiberado)) {
-            teclas.delete(comandoLiberado);
-        }
-    }
-
-    botao.addEventListener("pointerup", soltar);
-    botao.addEventListener("pointercancel", soltar);
-    botao.addEventListener("lostpointercapture", soltar);
+    botao.addEventListener("pointerup", liberarPonteiro);
+    botao.addEventListener("pointercancel", liberarPonteiro);
+    botao.addEventListener("lostpointercapture", liberarPonteiro);
 }
+
+// Fallback global: alguns navegadores móveis cancelam a captura quando há
+// troca de foco, gesto do sistema ou toque que termina fora do botão.
+window.addEventListener("pointerup", liberarPonteiro, true);
+window.addEventListener("pointercancel", liberarPonteiro, true);
+window.addEventListener("blur", () => {
+    ponteirosAtivos.clear();
+    teclas.clear();
+    tempoPulo = 0;
+});
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+        ponteirosAtivos.clear();
+        teclas.clear();
+        tempoPulo = 0;
+    }
+});
 
 ligarControle("btn-esquerda", "esquerda");
 ligarControle("btn-direita", "direita");
