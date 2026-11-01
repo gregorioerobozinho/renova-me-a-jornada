@@ -9,6 +9,17 @@
 const $ = (seletor) => document.querySelector(seletor);
 const telas = document.querySelectorAll(".tela");
 
+// Os objetos que caem do céu são exclusivos da versão para computador.
+// A detecção combina identificação móvel com características de toque/tela,
+// inclusive em celulares usados na orientação horizontal.
+const ehCelular = (() => {
+    const agente = navigator.userAgent || "";
+    const identificadoComoMovel = /Android|iPhone|iPod|Mobile|Windows Phone/i.test(agente);
+    const telaDeToqueCompacta = window.matchMedia("(pointer: coarse)").matches &&
+        Math.min(window.screen.width || window.innerWidth, window.screen.height || window.innerHeight) <= 900;
+    return identificadoComoMovel || telaDeToqueCompacta;
+})();
+
 function mostrarTela(id) {
     telas.forEach((tela) => {
         const ativa = tela.id === id;
@@ -646,16 +657,18 @@ function atualizarObjetos(dt) {
         tempoProximaFera = 5;
     }
 
-    // Objetos extras caem do céu a partir dos 10 segundos. Eles pousam e
-    // permanecem no chão até serem atingidos pela Bíblia. Não substituem
-    // nem alteram a frequência dos obstáculos que já atravessam a cena.
-    if (tempoTotalObjetos >= 10 && tempoProximaCaixaCaindo <= 0) {
-        criarObjetoCaindo("caixote-caindo");
-        tempoProximaCaixaCaindo = 7;
-    }
-    if (tempoTotalObjetos >= 10 && tempoProximaNuvemCaindo <= 0) {
-        criarObjetoCaindo("nuvem-negra-caindo");
-        tempoProximaNuvemCaindo = 9;
+    // Objetos extras caem do céu somente na versão para computador.
+    // No celular, os cronômetros ficam suspensos e nenhum desses objetos
+    // é criado; os obstáculos que atravessam a cena continuam normalmente.
+    if (!ehCelular) {
+        if (tempoTotalObjetos >= 10 && tempoProximaCaixaCaindo <= 0) {
+            criarObjetoCaindo("caixote-caindo");
+            tempoProximaCaixaCaindo = 7;
+        }
+        if (tempoTotalObjetos >= 10 && tempoProximaNuvemCaindo <= 0) {
+            criarObjetoCaindo("nuvem-negra-caindo");
+            tempoProximaNuvemCaindo = 9;
+        }
     }
 
     // Personagens amigos atravessam a cena apenas como decoração.
