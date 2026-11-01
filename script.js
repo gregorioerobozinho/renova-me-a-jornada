@@ -92,7 +92,7 @@ avisoMeta.textContent = "O jogo termina quando alcançar 10.000 pontos";
 cenario.appendChild(avisoMeta);
 
 const indicadorTempo = document.querySelector("#indicador-tempo");
-const TEMPO_LIMITE_SEGUNDOS = 7 * 60;
+const TEMPO_LIMITE_SEGUNDOS = 10 * 60;
 const PONTUACAO_VITORIA = 10000;
 let tempoRestante = TEMPO_LIMITE_SEGUNDOS;
 let partidaEncerrada = false;
@@ -132,7 +132,7 @@ function finalizarPartida(venceu) {
         <h2>${venceu ? "Parabéns! Meta alcançada!" : "Tempo esgotado!"}</h2>
         <p>${venceu
             ? "Você alcançou os 10.000 pontos dentro do tempo."
-            : "Você não alcançou os 10.000 pontos em 7 minutos. Tente novamente!"}</p>
+            : "Você não alcançou os 10.000 pontos em 10 minutos. Tente novamente!"}</p>
         <p class="pontuacao-final">Pontuação final: ${pontuacao.toLocaleString("pt-BR")} pontos</p>
         <p class="tempo-final">Tempo utilizado: ${formatarTempo(tempoDecorrido)}</p>
     `;
@@ -249,9 +249,12 @@ let tempoProximaCaixa = 5;
 let tempoProximaNuvemNegra = 6;
 let tempoProximaFera = 7;
 let tempoProximaNuvemClara = 10;
+let tempoProximaCaixaCaindo = 10;
+let tempoProximaNuvemCaindo = 10;
 let tempoTotalObjetos = 0;
 let sequenciaObjetos = 0;
 let tempoProximoAmigo = 10;
+let indiceProximoAmigo = 0;
 let ladoProximaNuvem = 1;
 let ladoProximaFera = 1;
 let ladoProximaCaixa = 1;
@@ -279,9 +282,12 @@ function limparObjetos() {
     tempoProximaNuvemNegra = 6;
     tempoProximaFera = 7;
     tempoProximaNuvemClara = 10;
+    tempoProximaCaixaCaindo = 10;
+    tempoProximaNuvemCaindo = 10;
     tempoTotalObjetos = 0;
     sequenciaObjetos = 0;
     tempoProximoAmigo = 10;
+    indiceProximoAmigo = 0;
     ladoProximaNuvem = 1;
     ladoProximaFera = 1;
     ladoProximaCaixa = 1;
@@ -338,8 +344,44 @@ function criarCaixote() {
     camadaObjetos.appendChild(elemento);
     objetosCenario.push({
         elemento, tipo: "caixote", x, direcao,
-        velocidade: Math.max(70, fisica.velocidadeCenario * 0.5625),
+        velocidade: Math.max(87.5, fisica.velocidadeCenario * 0.703125),
         removido: false
+    });
+}
+
+function criarObjetoCaindo(tipo) {
+    const eCaixa = tipo === "caixote-caindo";
+    const imagensCaixas = ["FakeNews.png", "Agressão.png", "Violência.png", "Por.png", "Mentiras.png", "Ira.png", "Fúria.png", "Intolerância.png"];
+    const imagensNuvens = ["Por3.png", "Intolerância3.png", "Violência3.png", "Ira3.png", "Mentira3.png", "FakeNews3.png", "Agressão3.png"];
+    const elemento = document.createElement("div");
+    elemento.className = eCaixa ? "objeto-jogo objeto-caixote" : "objeto-jogo objeto-nuvem-negra";
+    elemento.setAttribute("aria-label", eCaixa ? "Caixote que caiu do céu" : "Nuvem escura que caiu do céu");
+    const imagem = document.createElement("img");
+    imagem.src = (eCaixa ? imagensCaixas : imagensNuvens)[Math.floor(Math.random() * (eCaixa ? imagensCaixas : imagensNuvens).length)];
+    imagem.alt = "";
+    imagem.draggable = false;
+    imagem.onerror = () => {
+        elemento.remove();
+        const falha = objetosCenario.find((obj) => obj.elemento === elemento);
+        if (falha) falha.removido = true;
+    };
+    elemento.appendChild(imagem);
+    camadaObjetos.appendChild(elemento);
+
+    const largura = elemento.offsetWidth || (eCaixa ? 76 : 120);
+    const margem = Math.max(0, cenario.clientWidth - largura);
+    const x = Math.random() * margem;
+    const direcaoHorizontal = Math.random() < 0.5 ? -1 : 1;
+    const alturaCena = cenario.clientHeight || 500;
+    const bottomChao = parseFloat(getComputedStyle(elemento).bottom) || (eCaixa ? 68 : 68);
+    const bottomInicial = alturaCena + (eCaixa ? 80 : 100);
+    elemento.style.left = `${x}px`;
+    elemento.style.bottom = `${bottomInicial}px`;
+    objetosCenario.push({
+        elemento, tipo, x, bottom: bottomInicial, bottomChao,
+        direcaoHorizontal, velocidadeQueda: 250 + Math.random() * 90,
+        velocidadeLateral: 18 + Math.random() * 28,
+        caindo: true, removido: false
     });
 }
 
@@ -371,7 +413,7 @@ function criarNuvemNegra() {
     const x = direcao > 0 ? -largura - 8 : cenario.clientWidth + 8;
     const objeto = {
         elemento, tipo: "nuvem-negra", x, direcao,
-        velocidade: Math.max(70, fisica.velocidadeCenario * 0.5625),
+        velocidade: Math.max(87.5, fisica.velocidadeCenario * 0.703125),
         removido: false
     };
     elemento.style.left = `${objeto.x}px`;
@@ -397,7 +439,7 @@ function criarFera() {
     const x = direcao > 0 ? -largura : cenario.clientWidth + 8;
     const ator = {
         elemento, imagem, modelo, x, direcao, quadro: 0, tempo: 0,
-        velocidade: Math.max(70, fisica.velocidadeCenario * 0.5625), removido: false
+        velocidade: Math.max(87.5, fisica.velocidadeCenario * 0.703125), removido: false
     };
     // Use a sequência desenhada para o sentido real do deslocamento.
     // Não espelhar a sequência direita: isso fazia algumas feras parecerem andar de costas.
@@ -420,7 +462,8 @@ function criarFera() {
 }
 
 function criarAmigo() {
-    const modelo = SEQUENCIAS_AMIGOS[Math.floor(Math.random() * SEQUENCIAS_AMIGOS.length)];
+    const modelo = SEQUENCIAS_AMIGOS[indiceProximoAmigo % SEQUENCIAS_AMIGOS.length];
+    indiceProximoAmigo += 1;
     // Amigos cruzam a faixa superior apenas como animação, sem colisão com Robozinho, a 50% da velocidade anterior.
     const direcao = Math.random() < 0.5 ? 1 : -1;
     const elemento = document.createElement("div");
@@ -526,12 +569,12 @@ function verificarColisoesObjetos() {
             adicionarPontos(50);
             atualizarVidas(1, "Nuvem branca! Você conquistou uma vida.");
             removerObjeto(objeto);
-        } else if (objeto.tipo === "caixote") {
+        } else if (objeto.tipo === "caixote" || objeto.tipo === "caixote-caindo") {
             if (fisica.alturaPulo < 28) {
                 atualizarVidas(-1, "Você bateu em um caixote e perdeu uma vida.");
                 removerObjeto(objeto);
             }
-        } else if (objeto.tipo === "nuvem-negra") {
+        } else if (objeto.tipo === "nuvem-negra" || objeto.tipo === "nuvem-negra-caindo") {
             // Agachado, Robozinho passa por baixo da nuvem escura.
             if (fisica.agachado && fisica.noChao) {
                 continue;
@@ -574,6 +617,9 @@ function atualizarObjetos(dt) {
     tempoProximaNuvemNegra -= dt;
     tempoProximaFera -= dt;
     tempoProximaNuvemClara -= dt;
+    tempoProximaCaixaCaindo -= dt;
+    tempoProximaNuvemCaindo -= dt;
+    tempoProximoAmigo -= dt;
 
     // Entradas escalonadas: caixa aos 5s, nuvem escura aos 6s,
     // fera aos 7s. Cada categoria repete em intervalos de 5 segundos.
@@ -600,6 +646,24 @@ function atualizarObjetos(dt) {
         tempoProximaFera = 5;
     }
 
+    // Objetos extras caem do céu a partir dos 10 segundos. Eles pousam e
+    // permanecem no chão até serem atingidos pela Bíblia. Não substituem
+    // nem alteram a frequência dos obstáculos que já atravessam a cena.
+    if (tempoTotalObjetos >= 10 && tempoProximaCaixaCaindo <= 0) {
+        criarObjetoCaindo("caixote-caindo");
+        tempoProximaCaixaCaindo = 7;
+    }
+    if (tempoTotalObjetos >= 10 && tempoProximaNuvemCaindo <= 0) {
+        criarObjetoCaindo("nuvem-negra-caindo");
+        tempoProximaNuvemCaindo = 9;
+    }
+
+    // Personagens amigos atravessam a cena apenas como decoração.
+    if (tempoProximoAmigo <= 0) {
+        criarAmigo();
+        tempoProximoAmigo = 10;
+    }
+
     // Uma nuvem branca atravessa a cena a cada 10 segundos.
     if (tempoProximaNuvemClara <= 0) {
         criarObjetoCenario();
@@ -608,7 +672,21 @@ function atualizarObjetos(dt) {
 
     for (const objeto of objetosCenario) {
         if (objeto.removido) continue;
-        if (objeto.tipo === "nuvem-negra") {
+        if (objeto.tipo === "caixote-caindo" || objeto.tipo === "nuvem-negra-caindo") {
+            if (objeto.caindo) {
+                objeto.bottom -= objeto.velocidadeQueda * dt;
+                objeto.x += objeto.direcaoHorizontal * objeto.velocidadeLateral * dt;
+                const limiteX = Math.max(0, cenario.clientWidth - (objeto.elemento.offsetWidth || 80));
+                if (objeto.x <= 0 || objeto.x >= limiteX) objeto.direcaoHorizontal *= -1;
+                objeto.x = Math.max(0, Math.min(limiteX, objeto.x));
+                if (objeto.bottom <= objeto.bottomChao) {
+                    objeto.bottom = objeto.bottomChao;
+                    objeto.caindo = false;
+                }
+                objeto.elemento.style.bottom = `${objeto.bottom}px`;
+                objeto.elemento.style.left = `${objeto.x}px`;
+            }
+        } else if (objeto.tipo === "nuvem-negra") {
             // Movimento independente do avanço/recuo de Robozinho.
             objeto.x += objeto.direcao * objeto.velocidade * dt;
             if ((objeto.direcao > 0 && objeto.x > cenario.clientWidth + 140) ||
@@ -645,7 +723,7 @@ function acertarObjetoComBiblia(biblia) {
     // Reúne caixas, nuvens escuras e feras em uma única lista.
     // Se houver sobreposição, escolhe apenas o alvo mais próximo do centro do tiro.
     for (const objeto of objetosCenario) {
-        if (objeto.removido || !["caixote", "nuvem-negra"].includes(objeto.tipo)) continue;
+        if (objeto.removido || !["caixote", "nuvem-negra", "caixote-caindo", "nuvem-negra-caindo"].includes(objeto.tipo)) continue;
         const alvo = objeto.elemento.getBoundingClientRect();
         const atingiu = tiro.left <= alvo.right && tiro.right >= alvo.left &&
             tiro.top <= alvo.bottom && tiro.bottom >= alvo.top;
