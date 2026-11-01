@@ -1115,14 +1115,14 @@ html, body {
 /* Ajuste fino final: personagem principal e personagens de passagem.
    Aplicado somente às fases diferentes de 3 e 5. */
 #cenario:not(.fase-ajuste-estrada) #personagens {
-    bottom: 84px !important;
+    bottom: 108px !important;
 }
 #cenario:not(.fase-ajuste-estrada) .ator-amigo {
     bottom: 85px !important;
 }
 @media (max-width: 650px) {
     #cenario:not(.fase-ajuste-estrada) #personagens {
-        bottom: 84px !important;
+        bottom: 108px !important;
     }
     #cenario:not(.fase-ajuste-estrada) .ator-amigo {
         bottom: 85px !important;
@@ -1174,5 +1174,18 @@ html, body {
     #indicador-tempo {
         min-width: 54px;
         font-size: 0.9rem;
+    }
+}
+
+/* Alinhamento solicitado para caixotes e nuvens escuras nas fases 1, 2, 4 e 6 a 10.
+   As fases 3 e 5 permanecem excluídas deste ajuste. */
+#cenario:not(.fase-ajuste-estrada) .objeto-caixote,
+#cenario:not(.fase-ajuste-estrada) .objeto-nuvem-negra {
+    bottom: 108px !important;
+}
+@media (max-width: 650px) {
+    #cenario:not(.fase-ajuste-estrada) .objeto-caixote,
+    #cenario:not(.fase-ajuste-estrada) .objeto-nuvem-negra {
+        bottom: 108px !important;
     }
 }
