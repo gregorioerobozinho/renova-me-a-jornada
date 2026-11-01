@@ -1191,3 +1191,12 @@ html, body {
         bottom: 108px !important;
     }
 }
+
+/* Ajuste exclusivo para celulares: Robozinho um pouco mais baixo.
+   As fases 3 e 5 mantêm seu posicionamento específico. */
+@media (max-width: 900px) {
+    #cenario:not(.fase-ajuste-estrada) #personagens {
+        bottom: 96px !important;
+    }
+}
+

@@ -951,6 +951,22 @@ function ligarControle(id, comando, aoPressionar) {
 
         teclas.add(comando);
 
+        // Nas setas de toque, a troca de direção é imediata: elimina a
+        // inércia contrária e dá um pequeno impulso inicial no novo sentido.
+        if (comando === "esquerda" || comando === "direita") {
+            const novaDirecao = comando === "direita" ? 1 : -1;
+            // No celular, a seta muda a direção e inicia o deslocamento
+            // imediatamente, sem esperar a aceleração vencer a inércia anterior.
+            const impulsoDirecional = Math.max(180, Math.abs(fisica.velocidadeX));
+            fisica.velocidadeX = novaDirecao * Math.min(
+                fisica.velocidadeMaxima,
+                impulsoDirecional
+            );
+            ultimaDirecao = novaDirecao;
+            jaSeMoveu = true;
+            personagem.src = novaDirecao > 0 ? "Robozinho2.png" : "Robozinho6.png";
+        }
+
         if (!fisica.faseIniciada) {
             fisica.faseIniciada = true;
             fisica.ultimoTempo = performance.now();
