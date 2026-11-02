@@ -1,18 +1,19 @@
-TRILHA SONORA INCLUÍDA — RENOVA-ME: A JORNADA!
+RENOVA-ME: A JORNADA! — ATUALIZAÇÃO DE ÁUDIO v9
 
-Arquivos deste pacote:
-- script.js: inicia a trilha quando uma fase é aberta, repete continuamente, pausa ao pausar o jogo, retoma ao continuar e para ao sair/encerrar a fase.
-- renova_me_trilha_original_10s.wav: arquivo de áudio da trilha original de 10 segundos.
-- service-worker.js: atualiza o cache para v8 e inclui o WAV no cache offline.
+Substitua os cinco arquivos deste pacote na pasta principal do projeto:
+- index.html
+- style.css
+- script.js
+- service-worker.js
+- renova_me_trilha_original_10s.wav
 
-INSTALAÇÃO
-1. Extraia este ZIP.
-2. Copie os três arquivos para a pasta principal do jogo, substituindo script.js e service-worker.js e adicionando o arquivo WAV.
-3. Preserve todos os demais arquivos e imagens.
-4. Publique as alterações no GitHub Pages.
-5. Abra o jogo com internet para receber a atualização. Feche e abra novamente o aplicativo instalado se ele ainda usar a versão antiga.
+Não apague nem substitua as imagens, o manifest.webmanifest ou a pasta icons.
 
-A trilha começa quando o jogador escolhe uma fase, fica em loop, pausa junto com o jogo e reinicia quando uma nova fase é iniciada.
-Os quatro efeitos curtos de colisão continuam no script.js.
+O botão “Som ligado/desligado” controla a música e os quatro efeitos sonoros.
+A música começa quando uma fase é iniciada, pausa junto com o jogo e volta ao retomar.
+O cache do PWA foi atualizado para v9.
 
-Verificação técnica: sintaxe JavaScript e integridade do ZIP verificadas. Não foi realizado teste de reprodução em navegador/dispositivo físico.
+Depois de substituir os arquivos, publique a atualização no GitHub Pages.
+No celular, feche completamente o jogo instalado e abra novamente. Se a versão antiga continuar aparecendo, feche o Chrome, abra o site novamente e aguarde a atualização do service worker.
+
+Observação: os arquivos foram verificados por sintaxe e integridade do ZIP; não foi possível testar a reprodução em um aparelho físico.

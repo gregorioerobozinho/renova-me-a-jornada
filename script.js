@@ -47,8 +47,21 @@ const musicaDeFundo = new Audio("renova_me_trilha_original_10s.wav");
 musicaDeFundo.loop = true;
 musicaDeFundo.preload = "auto";
 musicaDeFundo.volume = 0.28;
+let somAtivado = true;
+const botaoSom = $("#btn-som");
+
+function atualizarBotaoSom() {
+    if (!botaoSom) return;
+    botaoSom.textContent = somAtivado ? "🔊 Som ligado" : "🔇 Som desligado";
+    botaoSom.setAttribute("aria-pressed", String(somAtivado));
+    botaoSom.setAttribute(
+        "aria-label",
+        somAtivado ? "Desligar música e efeitos sonoros" : "Ligar música e efeitos sonoros"
+    );
+}
 
 function iniciarMusicaDeFundo() {
+    if (!somAtivado) return;
     musicaDeFundo.play().catch((erro) => {
         // Alguns navegadores podem exigir uma nova interação do jogador.
         console.warn("O navegador ainda não autorizou a trilha sonora:", erro);
@@ -60,8 +73,25 @@ function pausarMusicaDeFundo() {
 }
 
 function retomarMusicaDeFundo() {
-    if (!musicaDeFundo.paused) return;
+    if (!somAtivado || !musicaDeFundo.paused) return;
     iniciarMusicaDeFundo();
+}
+
+function alternarSom() {
+    somAtivado = !somAtivado;
+    if (somAtivado) {
+        // A interação no botão também libera o áudio nos navegadores móveis.
+        prepararAudio();
+        if (!$("#tela-jogo").hidden && !jogoPausado) iniciarMusicaDeFundo();
+    } else {
+        pausarMusicaDeFundo();
+    }
+    atualizarBotaoSom();
+}
+
+if (botaoSom) {
+    botaoSom.addEventListener("click", alternarSom);
+    atualizarBotaoSom();
 }
 
 function pararMusicaDeFundo() {
@@ -70,6 +100,7 @@ function pararMusicaDeFundo() {
 }
 
 function tocarEfeito(tipo) {
+    if (!somAtivado) return;
     const ctx = prepararAudio();
     if (!ctx) return;
     const agora = ctx.currentTime;
@@ -920,6 +951,8 @@ function prepararFase(fase = fisica.fase) {
 
 function iniciarFase(fase = fisica.fase) {
     pararFase();
+    // A seleção da fase é uma interação explícita que libera o áudio no celular.
+    prepararAudio();
     prepararFase(fase);
     mostrarTela("tela-jogo");
     iniciarMusicaDeFundo();

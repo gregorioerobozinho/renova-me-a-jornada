@@ -1200,3 +1200,23 @@ html, body {
     }
 }
 
+
+
+/* Controle geral da trilha e dos efeitos sonoros. */
+#btn-som {
+    min-height: 40px;
+    padding: 7px 12px;
+    white-space: nowrap;
+    background: #245b80;
+    font-size: 0.9rem;
+}
+#btn-som[aria-pressed="false"] {
+    background: #424d56;
+}
+@media (max-width: 650px) {
+    #btn-som {
+        min-height: 38px;
+        padding: 6px 9px;
+        font-size: 0.82rem;
+    }
+}
