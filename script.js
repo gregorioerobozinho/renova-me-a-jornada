@@ -426,7 +426,7 @@ function criarObjetoCenario() {
     imagem.draggable = false;
     imagem.onerror = () => elemento.remove();
     elemento.appendChild(imagem);
-    elemento.style.left = `${cenario.clientWidth + 30}px`;
+    elemento.style.left = `${(camadaObjetos.clientWidth || cenario.clientWidth) + 150}px`;
     const alturaCena = cenario.clientHeight || 500;
     const alturaNuvem = 96;
     const alturaPersonagem = personagem?.offsetHeight || 100;
@@ -436,7 +436,7 @@ function criarObjetoCenario() {
     objetosCenario.push({
         elemento,
         tipo: "nuvem-clara",
-        x: cenario.clientWidth + 30,
+        x: (camadaObjetos.clientWidth || cenario.clientWidth) + 150,
         direcao: -1,
         velocidade: 130,
         removido: false
@@ -456,7 +456,7 @@ function criarCaixote() {
     elemento.appendChild(imagem);
     const direcao = ladoProximaCaixa;
     ladoProximaCaixa *= -1;
-    const x = direcao > 0 ? cenario.clientWidth + 30 : -90;
+    const x = direcao > 0 ? (camadaObjetos.clientWidth || cenario.clientWidth) + 110 : -90;
     elemento.style.left = `${x}px`;
     camadaObjetos.appendChild(elemento);
     objetosCenario.push({
@@ -527,7 +527,7 @@ function criarNuvemNegra() {
     // em que Robozinho está voltado, vindo da borda oposta.
     const direcao = ladoProximaNuvem;
     const largura = elemento.offsetWidth || 120;
-    const x = direcao > 0 ? -largura - 8 : cenario.clientWidth + 8;
+    const x = direcao > 0 ? -largura - 8 : (camadaObjetos.clientWidth || cenario.clientWidth) + largura + 20;
     const objeto = {
         elemento, tipo: "nuvem-negra", x, direcao,
         velocidade: Math.max(87.5, fisica.velocidadeCenario * 0.703125),
@@ -553,7 +553,7 @@ function criarFera() {
     elemento.appendChild(imagem);
     camadaObjetos.appendChild(elemento);
     const largura = 94;
-    const x = direcao > 0 ? -largura : cenario.clientWidth + 8;
+    const x = direcao > 0 ? -largura : (camadaObjetos.clientWidth || cenario.clientWidth) + largura + 20;
     const ator = {
         elemento, imagem, modelo, x, direcao, quadro: 0, tempo: 0,
         velocidade: Math.max(87.5, fisica.velocidadeCenario * 0.703125), removido: false
@@ -590,7 +590,7 @@ function criarAmigo() {
     imagem.draggable = false;
     elemento.appendChild(imagem);
     camadaObjetos.appendChild(elemento);
-    const x = direcao > 0 ? -100 : cenario.clientWidth + 10;
+    const x = direcao > 0 ? -100 : (camadaObjetos.clientWidth || cenario.clientWidth) + 110;
     const ator = {
         elemento, imagem, modelo, x, direcao, quadro: 0, tempo: 0,
         velocidade: Math.max(130, fisica.velocidadeCenario * 1.375), removido: false
