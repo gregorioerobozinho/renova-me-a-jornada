@@ -38,7 +38,13 @@ function prepararAudio() {
     const AudioContextClasse = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClasse) return null;
     if (!contextoAudio) contextoAudio = new AudioContextClasse();
-    if (contextoAudio.state === "suspended") contextoAudio.resume();
+    // Retomar durante um gesto real do jogador, antes da colisão.
+    if (contextoAudio.state === "suspended") {
+        const retomada = contextoAudio.resume();
+        if (retomada && typeof retomada.catch === "function") {
+            retomada.catch((erro) => console.warn("Áudio ainda não liberado pelo navegador:", erro));
+        }
+    }
     return contextoAudio;
 }
 
@@ -890,6 +896,7 @@ function prepararFase(fase = fisica.fase) {
 }
 
 function iniciarFase(fase = fisica.fase) {
+    prepararAudio(); // Libera o áudio no clique/toque que inicia a fase.
     pararFase();
     prepararFase(fase);
     mostrarTela("tela-jogo");
@@ -935,6 +942,7 @@ function comandoDaTecla(tecla) {
 document.addEventListener("keydown", (evento) => {
     if ($("#tela-jogo").hidden) return;
 
+    prepararAudio(); // Libera o áudio quando a partida começa pelo teclado.
     const tecla = normalizarTecla(evento.key);
     const comando = comandoDaTecla(tecla);
 
@@ -1000,6 +1008,7 @@ function ligarControle(id, comando, aoPressionar) {
     botao.addEventListener("pointerdown", (evento) => {
         if (evento.pointerType === "mouse" && evento.button !== 0) return;
         evento.preventDefault();
+        prepararAudio(); // Libera o áudio no primeiro toque nos controles.
 
         // Cada dedo recebe seu próprio registro: permite combinar direção,
         // pulo e Bíblia sem que um toque interrompa o outro.
