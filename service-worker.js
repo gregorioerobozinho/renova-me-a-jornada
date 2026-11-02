@@ -1,10 +1,11 @@
-const CACHE_NAME = "renova-me-jornada-v7";
+const CACHE_NAME = "renova-me-jornada-v8";
 const CORE_FILES = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
   "./manifest.webmanifest",
+  "./renova_me_trilha_original_10s.wav",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png"

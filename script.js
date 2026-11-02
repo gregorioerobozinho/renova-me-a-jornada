@@ -38,14 +38,35 @@ function prepararAudio() {
     const AudioContextClasse = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClasse) return null;
     if (!contextoAudio) contextoAudio = new AudioContextClasse();
-    // Retomar durante um gesto real do jogador, antes da colisão.
-    if (contextoAudio.state === "suspended") {
-        const retomada = contextoAudio.resume();
-        if (retomada && typeof retomada.catch === "function") {
-            retomada.catch((erro) => console.warn("Áudio ainda não liberado pelo navegador:", erro));
-        }
-    }
+    if (contextoAudio.state === "suspended") contextoAudio.resume();
     return contextoAudio;
+}
+
+// ---------- Trilha sonora original do jogo (loop contínuo de 10 segundos) ----------
+const musicaDeFundo = new Audio("renova_me_trilha_original_10s.wav");
+musicaDeFundo.loop = true;
+musicaDeFundo.preload = "auto";
+musicaDeFundo.volume = 0.28;
+
+function iniciarMusicaDeFundo() {
+    musicaDeFundo.play().catch((erro) => {
+        // Alguns navegadores podem exigir uma nova interação do jogador.
+        console.warn("O navegador ainda não autorizou a trilha sonora:", erro);
+    });
+}
+
+function pausarMusicaDeFundo() {
+    musicaDeFundo.pause();
+}
+
+function retomarMusicaDeFundo() {
+    if (!musicaDeFundo.paused) return;
+    iniciarMusicaDeFundo();
+}
+
+function pararMusicaDeFundo() {
+    musicaDeFundo.pause();
+    musicaDeFundo.currentTime = 0;
 }
 
 function tocarEfeito(tipo) {
@@ -226,8 +247,10 @@ function pausarJogo() {
     if (jogoPausado) {
         teclas.clear();
         tempoPulo = 0;
+        pausarMusicaDeFundo();
     } else {
         fisica.ultimoTempo = performance.now();
+        retomarMusicaDeFundo();
     }
 }
 
@@ -896,14 +919,15 @@ function prepararFase(fase = fisica.fase) {
 }
 
 function iniciarFase(fase = fisica.fase) {
-    prepararAudio(); // Libera o áudio no clique/toque que inicia a fase.
     pararFase();
     prepararFase(fase);
     mostrarTela("tela-jogo");
+    iniciarMusicaDeFundo();
     quadroAnimacao = requestAnimationFrame(loopJogo);
 }
 
 function pararFase() {
+    pararMusicaDeFundo();
     if (quadroAnimacao) {
         cancelAnimationFrame(quadroAnimacao);
         quadroAnimacao = 0;
@@ -942,7 +966,6 @@ function comandoDaTecla(tecla) {
 document.addEventListener("keydown", (evento) => {
     if ($("#tela-jogo").hidden) return;
 
-    prepararAudio(); // Libera o áudio quando a partida começa pelo teclado.
     const tecla = normalizarTecla(evento.key);
     const comando = comandoDaTecla(tecla);
 
@@ -1008,7 +1031,6 @@ function ligarControle(id, comando, aoPressionar) {
     botao.addEventListener("pointerdown", (evento) => {
         if (evento.pointerType === "mouse" && evento.button !== 0) return;
         evento.preventDefault();
-        prepararAudio(); // Libera o áudio no primeiro toque nos controles.
 
         // Cada dedo recebe seu próprio registro: permite combinar direção,
         // pulo e Bíblia sem que um toque interrompa o outro.

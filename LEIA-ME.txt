@@ -1,10 +1,18 @@
-CORREÇÃO DOS EFEITOS SONOROS — RENOVA-ME: A JORNADA!
+TRILHA SONORA INCLUÍDA — RENOVA-ME: A JORNADA!
 
-Substitua estes dois arquivos na pasta do jogo: script.js e service-worker.js.
-Não apague nem substitua suas imagens, index.html, style.css ou outros arquivos.
+Arquivos deste pacote:
+- script.js: inicia a trilha quando uma fase é aberta, repete continuamente, pausa ao pausar o jogo, retoma ao continuar e para ao sair/encerrar a fase.
+- renova_me_trilha_original_10s.wav: arquivo de áudio da trilha original de 10 segundos.
+- service-worker.js: atualiza o cache para v8 e inclui o WAV no cache offline.
 
-Correções: o áudio é inicializado/liberado no clique que inicia a fase e também no primeiro comando de teclado/toque. Os quatro efeitos ligados às colisões foram preservados: nuvem branca, fera, nuvem escura e caixote. O cache foi atualizado para v7 para evitar o uso de script antigo.
+INSTALAÇÃO
+1. Extraia este ZIP.
+2. Copie os três arquivos para a pasta principal do jogo, substituindo script.js e service-worker.js e adicionando o arquivo WAV.
+3. Preserve todos os demais arquivos e imagens.
+4. Publique as alterações no GitHub Pages.
+5. Abra o jogo com internet para receber a atualização. Feche e abra novamente o aplicativo instalado se ele ainda usar a versão antiga.
 
-Depois publique os dois arquivos atualizados no GitHub Pages e feche/reabra o jogo com internet. Se o PWA continuar usando a versão antiga, pode ser necessário limpar os dados/cache do site ou reinstalar o atalho.
+A trilha começa quando o jogador escolhe uma fase, fica em loop, pausa junto com o jogo e reinicia quando uma nova fase é iniciada.
+Os quatro efeitos curtos de colisão continuam no script.js.
 
-Validação: sintaxe JavaScript e integridade do ZIP verificadas. Não foi realizado teste de áudio em navegador/dispositivo físico.
+Verificação técnica: sintaxe JavaScript e integridade do ZIP verificadas. Não foi realizado teste de reprodução em navegador/dispositivo físico.
