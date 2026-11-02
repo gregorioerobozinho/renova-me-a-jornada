@@ -30,6 +30,52 @@ function mostrarTela(id) {
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// ---------- Efeitos sonoros originais (Web Audio, sem arquivos de terceiros) ----------
+// O áudio é liberado pelo navegador após a primeira interação do jogador.
+let contextoAudio = null;
+
+function prepararAudio() {
+    const AudioContextClasse = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClasse) return null;
+    if (!contextoAudio) contextoAudio = new AudioContextClasse();
+    if (contextoAudio.state === "suspended") contextoAudio.resume();
+    return contextoAudio;
+}
+
+function tocarEfeito(tipo) {
+    const ctx = prepararAudio();
+    if (!ctx) return;
+    const agora = ctx.currentTime;
+    const ganho = ctx.createGain();
+    ganho.gain.setValueAtTime(0.0001, agora);
+    ganho.connect(ctx.destination);
+    const notas = {
+        nuvem:  { frequencias: [660, 880, 1046], duracao: 0.22, forma: "sine", volume: 0.12 },
+        fera:   { frequencias: [180, 115, 75], duracao: 0.30, forma: "sawtooth", volume: 0.10 },
+        escura: { frequencias: [260, 190], duracao: 0.28, forma: "triangle", volume: 0.11 },
+        caixa:  { frequencias: [125, 85], duracao: 0.20, forma: "square", volume: 0.09 }
+    };
+    const som = notas[tipo];
+    if (!som) return;
+    ganho.gain.setValueAtTime(som.volume, agora + 0.01);
+    ganho.gain.exponentialRampToValueAtTime(0.0001, agora + som.duracao);
+    som.frequencias.forEach((frequencia, indice) => {
+        const oscilador = ctx.createOscillator();
+        const volumeNota = ctx.createGain();
+        oscilador.type = som.forma;
+        const inicio = agora + indice * (tipo === "nuvem" ? 0.045 : 0.025);
+        oscilador.frequency.setValueAtTime(frequencia, inicio);
+        if (tipo === "fera" || tipo === "escura" || tipo === "caixa") {
+            oscilador.frequency.exponentialRampToValueAtTime(Math.max(40, frequencia * 0.62), agora + som.duracao);
+        }
+        volumeNota.gain.setValueAtTime(1 / som.frequencias.length, inicio);
+        volumeNota.connect(ganho);
+        oscilador.connect(volumeNota);
+        oscilador.start(inicio);
+        oscilador.stop(agora + som.duracao + 0.02);
+    });
+}
+
 // ---------- Menus já existentes ----------
 
 $("#btn-jogar").addEventListener("click", () => {
@@ -532,6 +578,7 @@ function verificarColisaoFeras() {
         const tocou = robo.left + 12 < ret.right - 12 && robo.right - 12 > ret.left + 12 &&
             robo.top + 10 < ret.bottom - 8 && robo.bottom - 8 > ret.top + 8;
         if (tocou) {
+            tocarEfeito("fera");
             atualizarVidas(-1, `O ${fera.modelo.nome} atingiu Robozinho! Você perdeu uma vida.`);
             fera.elemento.remove();
             fera.removido = true;
@@ -577,11 +624,13 @@ function verificarColisoesObjetos() {
         if (!tocou) continue;
 
         if (objeto.tipo === "nuvem-clara") {
+            tocarEfeito("nuvem");
             adicionarPontos(50);
             atualizarVidas(1, "Nuvem branca! Você conquistou uma vida.");
             removerObjeto(objeto);
         } else if (objeto.tipo === "caixote" || objeto.tipo === "caixote-caindo") {
             if (fisica.alturaPulo < 28) {
+                tocarEfeito("caixa");
                 atualizarVidas(-1, "Você bateu em um caixote e perdeu uma vida.");
                 removerObjeto(objeto);
             }
@@ -590,6 +639,7 @@ function verificarColisoesObjetos() {
             if (fisica.agachado && fisica.noChao) {
                 continue;
             }
+            tocarEfeito("escura");
             atualizarVidas(-1, "Uma nuvem negra atingiu você! Cuidado.");
             removerObjeto(objeto);
         }
