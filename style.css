@@ -798,21 +798,6 @@ html, body {
     }
 }
 
-/* Distribuição dos comandos no celular em modo horizontal */
-@media (max-width: 900px) and (orientation: landscape) {
-    #controles-jogo {
-        left: 1.5%;
-        right: 1.5%;
-        justify-content: space-between;
-        gap: clamp(8px, 2.4vw, 26px);
-        padding-left: 1%;
-        padding-right: 1%;
-    }
-    #controles-jogo button {
-        min-width: clamp(54px, 9vw, 100px);
-    }
-}
-
 /* No modo vertical, cenário acima e controles em uma faixa inferior própria */
 @media (max-width: 650px) and (orientation: portrait) {
     #tela-jogo {
@@ -871,22 +856,6 @@ html, body {
 #btn-esquerda { order: 3; }
 #btn-direita { order: 4; }
 
-/* No celular deitado, comandos ficam nos cantos opostos da tela. */
-@media (max-width: 900px) and (orientation: landscape) {
-    #controles-jogo {
-        left: 0;
-        right: 0;
-        bottom: max(8px, env(safe-area-inset-bottom));
-        display: flex;
-        justify-content: space-between;
-        padding: 0 clamp(8px, 2.5vw, 28px);
-        gap: clamp(8px, 2vw, 22px);
-    }
-    #btn-biblia, #btn-pular { margin-right: 8px; }
-    #btn-esquerda { margin-left: auto; }
-    #controles-jogo button { min-width: clamp(58px, 8vw, 88px); min-height: 48px; }
-}
-
 /* O jogo é apresentado apenas em paisagem nos celulares. */
 @media (max-width: 900px) and (orientation: portrait) {
     #aviso-gire-aparelho {
@@ -915,40 +884,6 @@ html, body {
     -webkit-tap-highlight-color: transparent;
 }
 #cenario img, #personagens img { -webkit-user-drag: none; user-drag: none; }
-
-
-/* Ajuste final: dois grupos compactos nos cantos inferiores em paisagem. */
-@media (max-width: 900px) and (orientation: landscape) {
-    #controles-jogo {
-        left: 0;
-        right: 0;
-        bottom: max(8px, env(safe-area-inset-bottom));
-        display: flex;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        align-items: center;
-        gap: 8px;
-        padding: 0 clamp(10px, 2.2vw, 26px);
-    }
-    #btn-biblia,
-    #btn-pular {
-        flex: 0 0 auto;
-        margin: 0;
-    }
-    #btn-pular {
-        margin-right: auto;
-    }
-    #btn-esquerda,
-    #btn-direita {
-        flex: 0 0 auto;
-        margin: 0;
-    }
-    #controles-jogo button {
-        min-width: clamp(58px, 8vw, 88px);
-        min-height: 48px;
-        padding: 7px 10px;
-    }
-}
 
 /* Aviso de orientação horizontal quando o celular está em pé. */
 #aviso-gire-aparelho {
@@ -1010,57 +945,6 @@ html, body {
     user-drag: none !important;
     touch-action: none;
 }
-
-
-/* Correção solicitada: controles em dois pares compactos, nos cantos da tela. */
-@media (max-width: 900px) and (orientation: landscape) {
-    #controles-jogo {
-        position: absolute;
-        inset: auto 0 max(8px, env(safe-area-inset-bottom)) 0;
-        display: block;
-        height: 54px;
-        padding: 0;
-        margin: 0;
-        pointer-events: none;
-    }
-    #controles-jogo button {
-        position: absolute;
-        top: 0;
-        min-width: 64px;
-        width: clamp(64px, 8vw, 84px);
-        min-height: 60px;
-        height: 60px;
-        margin: 0 !important;
-        padding: 6px 8px;
-        pointer-events: auto;
-        touch-action: none;
-        -webkit-tap-highlight-color: transparent;
-    }
-    /* Par esquerdo: Bíblia + Pular. */
-    #btn-biblia { left: 10px; right: auto; }
-    #btn-pular { left: 76px; right: auto; }
-    /* Par direito: Esquerda + Direita. */
-    #btn-esquerda { right: 76px; left: auto; }
-    #btn-direita { right: 10px; left: auto; }
-}
-
-
-/* Botão de agachamento restaurado */
-#btn-agachar {
-    min-width: 82px;
-    background: #245b80;
-}
-#btn-agachar:active {
-    background: #347eaa;
-}
-@media (max-width: 650px) {
-    #btn-agachar {
-        min-width: 72px;
-        padding: 8px 10px;
-        font-size: 0.9rem;
-    }
-}
-
 
 /* Ajuste de estrada exclusivo das fases 3 e 5.
    Nas demais fases, os posicionamentos originais são preservados. */
@@ -1220,7 +1104,72 @@ html, body {
         font-size: 0.82rem;
     }
 }
-/* Correções finais dos objetos e personagens nas fases 3 e 5 */
+
+/* =========================================
+   CONTROLES EM DOIS PARES — MODO PAISAGEM
+   Bíblia + Pular à esquerda
+   Esquerda + Direita à direita
+   ========================================= */
+
+@media (max-width: 900px) and (orientation: landscape) {
+
+    #controles-jogo {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: max(8px, env(safe-area-inset-bottom));
+
+        display: block;
+        height: 64px;
+        padding: 0;
+        margin: 0;
+
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    #controles-jogo button {
+        position: absolute;
+        top: 0;
+
+        width: clamp(64px, 8vw, 84px);
+        min-width: 64px;
+        height: 60px;
+        min-height: 60px;
+
+        margin: 0 !important;
+        padding: 6px 8px;
+
+        pointer-events: auto;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Par esquerdo */
+    #btn-biblia {
+        left: 10px;
+        right: auto;
+    }
+
+    #btn-pular {
+        left: 82px;
+        right: auto;
+    }
+
+    /* Par direito */
+    #btn-esquerda {
+        right: 82px;
+        left: auto;
+    }
+
+    #btn-direita {
+        right: 10px;
+        left: auto;
+    }
+}
+
+/* Fases 3 e 5 — personagens acima da área dos controles */
+
 #cenario.fase-ajuste-estrada #personagens {
     bottom: 138px !important;
 }
@@ -1230,11 +1179,6 @@ html, body {
 }
 
 #cenario.fase-ajuste-estrada .ator-amigo {
-    bottom: 138px !important;
-}
-
-#cenario.fase-ajuste-estrada .objeto-caixote,
-#cenario.fase-ajuste-estrada .objeto-nuvem-negra {
     bottom: 138px !important;
 }
 
@@ -1250,9 +1194,148 @@ html, body {
     #cenario.fase-ajuste-estrada .ator-amigo {
         bottom: 112px !important;
     }
+}
 
-    #cenario.fase-ajuste-estrada .objeto-caixote,
-    #cenario.fase-ajuste-estrada .objeto-nuvem-negra {
+/* =========================================
+   CONTROLES EM DOIS PARES — MODO PAISAGEM
+   Bíblia + Pular à esquerda
+   Esquerda + Direita à direita
+   ========================================= */
+
+#btn-agachar {
+    display: none !important;
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+    #controles-jogo {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        display: block;
+        height: 64px;
+        padding: 0;
+        margin: 0;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    #controles-jogo button {
+        position: absolute;
+        top: 0;
+        width: clamp(64px, 8vw, 84px);
+        min-width: 64px;
+        height: 60px;
+        min-height: 60px;
+        margin: 0 !important;
+        padding: 6px 8px;
+        pointer-events: auto;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Par esquerdo */
+    #btn-biblia {
+        left: 10px;
+        right: auto;
+    }
+
+    #btn-pular {
+        left: 82px;
+        right: auto;
+    }
+
+    /* Par direito */
+    #btn-esquerda {
+        right: 82px;
+        left: auto;
+    }
+
+    #btn-direita {
+        right: 10px;
+        left: auto;
+    }
+}
+
+/* =========================================
+   FASES 3 E 5 — POSICIONAMENTO DOS PERSONAGENS
+   ========================================= */
+
+#cenario.fase-ajuste-estrada #personagens {
+    bottom: 138px !important;
+}
+
+#cenario.fase-ajuste-estrada .ator-fera {
+    bottom: 116px !important;
+}
+
+#cenario.fase-ajuste-estrada .ator-amigo {
+    bottom: 138px !important;
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 900px) {
+    #cenario.fase-ajuste-estrada #personagens {
+        bottom: 112px !important;
+    }
+
+    #cenario.fase-ajuste-estrada .ator-fera {
+        bottom: 104px !important;
+    }
+
+    #cenario.fase-ajuste-estrada .ator-amigo {
         bottom: 112px !important;
     }
 }
+
+/* CONTROLES EM DOIS PARES — CELULAR E COMPUTADOR EM PAISAGEM */
+@media (orientation: landscape) {
+    #controles-jogo {
+        position: absolute !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: max(8px, env(safe-area-inset-bottom)) !important;
+        display: block !important;
+        height: 64px;
+        padding: 0 !important;
+        margin: 0 !important;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    #controles-jogo button {
+        position: absolute !important;
+        top: 0 !important;
+        width: 68px;
+        min-width: 68px;
+        height: 54px;
+        min-height: 54px;
+        margin: 0 !important;
+        padding: 5px !important;
+        pointer-events: auto;
+        touch-action: none;
+    }
+
+    /* Par esquerdo: Bíblia + Pular */
+    #btn-biblia {
+        left: 12px !important;
+        right: auto !important;
+    }
+
+    #btn-pular {
+        left: 88px !important;
+        right: auto !important;
+    }
+
+    /* Par direito: Esquerda + Direita */
+    #btn-esquerda {
+        right: 88px !important;
+        left: auto !important;
+    }
+
+    #btn-direita {
+        right: 12px !important;
+        left: auto !important;
+    }
+}
+
