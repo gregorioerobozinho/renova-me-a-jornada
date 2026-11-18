@@ -1346,26 +1346,26 @@ html, body {
 /* Fases diferentes de 3 e 5 */
 #cenario:not(.fase-ajuste-estrada) .objeto-caixote,
 #cenario:not(.fase-ajuste-estrada) .objeto-nuvem-negra {
-    bottom: 230px !important;
+    bottom: 150px !important;
 }
 
 /* Fases 3 e 5 */
 #cenario.fase-ajuste-estrada .objeto-caixote {
-    bottom: 230px !important;
+    bottom: 150px !important;
 }
 
 #cenario.fase-ajuste-estrada .objeto-nuvem-negra {
-    bottom: 230px !important;
+    bottom: 150px !important;
 }
 
 /* Ajuste para telas menores */
 @media (max-width: 900px) {
     #cenario.fase-ajuste-estrada .objeto-caixote {
-        bottom: 230px !important;
+        bottom: 150px !important;
     }
 
     #cenario.fase-ajuste-estrada .objeto-nuvem-negra {
-        bottom: 230px !important;
+        bottom: 150px !important;
     }
 }
 
