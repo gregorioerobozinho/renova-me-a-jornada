@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "renova-me-jornada-v11";
+const CACHE_NAME = "renova-me-jornada-v12";
 const CORE_FILES = [
   "./",
   "./index.html",
