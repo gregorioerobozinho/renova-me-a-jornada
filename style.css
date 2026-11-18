@@ -1220,3 +1220,39 @@ html, body {
         font-size: 0.82rem;
     }
 }
+/* Correções finais dos objetos e personagens nas fases 3 e 5 */
+#cenario.fase-ajuste-estrada #personagens {
+    bottom: 138px !important;
+}
+
+#cenario.fase-ajuste-estrada .ator-fera {
+    bottom: 116px !important;
+}
+
+#cenario.fase-ajuste-estrada .ator-amigo {
+    bottom: 138px !important;
+}
+
+#cenario.fase-ajuste-estrada .objeto-caixote,
+#cenario.fase-ajuste-estrada .objeto-nuvem-negra {
+    bottom: 138px !important;
+}
+
+@media (max-width: 900px) {
+    #cenario.fase-ajuste-estrada #personagens {
+        bottom: 112px !important;
+    }
+
+    #cenario.fase-ajuste-estrada .ator-fera {
+        bottom: 104px !important;
+    }
+
+    #cenario.fase-ajuste-estrada .ator-amigo {
+        bottom: 112px !important;
+    }
+
+    #cenario.fase-ajuste-estrada .objeto-caixote,
+    #cenario.fase-ajuste-estrada .objeto-nuvem-negra {
+        bottom: 112px !important;
+    }
+}
